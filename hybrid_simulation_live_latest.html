@@ -1,0 +1,1260 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Delivery Simulation - Live Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .map-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .vehicle-toggle {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .vehicle-toggle.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .vehicle-toggle:hover {
+            transform: scale(1.05);
+        }
+        
+        .distance-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .distance-info.active {
+            display: block;
+        }
+        
+        .distance-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .distance-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .distance-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .distance-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .distance-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        
+        .timeline-event {
+            position: relative;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .timeline-event::before {
+            content: '';
+            position: absolute;
+            left: -36px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #667eea;
+        }
+        
+        .event-time {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        
+        .event-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .event-new-order {
+            background: #ffd93d;
+            color: #333;
+        }
+        
+        .event-assignment {
+            background: #6bcf7f;
+            color: white;
+        }
+        
+        .event-optimization {
+            background: #667eea;
+            color: white;
+        }
+        
+        .event-rejected {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .event-details {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .vehicle-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .vehicle-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .vehicle-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .route-stop {
+            padding: 10px;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .route-stop:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.02);
+        }
+
+        .route-stop.highlighted {
+            background: #ffc107 !important; /* Yellow highlight */
+            color: #333 !important;
+            transform: scale(1.05);
+            font-weight: bold;
+        }
+        
+        .route-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .metric {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        
+        .metric-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        
+        .pending-orders {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .pending-orders h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .pending-order {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .premium-vehicle {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            padding: 25px;
+            border-radius: 12px;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .success-badge {
+            background: #6bcf7f;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .warning-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .map-legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .legend-icon.depot {
+            background: #dc3545;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .legend-icon.stop {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Hybrid Delivery Simulation Dashboard</h1>
+            <p>Real-time Vehicle Routing with Layer 1 (Greedy) + Layer 2 (Optimization)</p>
+            <p><strong>Simulation Period:</strong> 09:00 AM - 05:00 PM</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-value">29</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Orders Assigned</div>
+                <div class="stat-value">17</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending Orders</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Vehicles</div>
+                <div class="stat-value">4</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Layer 2 Optimizations</div>
+                <div class="stat-value">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Route Duration</div>
+                <div class="stat-value">105 min</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            
+            
+            <div class="section">
+                <h2 class="section-title">🗺️ Interactive Route Map</h2>
+                
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-icon depot">D</div>
+                        <span>Depot (Start/End Point)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon stop">●</div>
+                        <span>Delivery Stop</span>
+                    </div>
+                </div>
+                
+                <div class="map-controls" id="vehicleToggles"></div>
+                
+                <div id="map"></div>
+                
+                <div class="distance-info" id="distanceInfo">
+                    <h4>📍 Route Segment Information</h4>
+                    <p id="segmentDescription">Select two consecutive stops on a route to see travel details.</p>
+                    <div class="distance-details" id="distanceDetails"></div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">Final Fleet Status</h2>
+                <div class="vehicle-grid">
+                    
+                <div class="vehicle-card">
+                    <div class="vehicle-header">Vehicle 0</div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 0, 1)">
+                        1. Dilli Burger Adda
+                    </div>
+                    
+                    <div class="route-metrics">
+                        <div class="metric">
+                            <div class="metric-value">1</div>
+                            <div class="metric-label">Stops</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">139</div>
+                            <div class="metric-label">Minutes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vehicle-card">
+                    <div class="vehicle-header">Vehicle 1</div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 1, 1)">
+                        1. Chittaranjan Park
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 1, 2)">
+                        2. Aura Pizzas
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 1, 3)">
+                        3. Sector 4
+                    </div>
+                    
+                    <div class="route-metrics">
+                        <div class="metric">
+                            <div class="metric-value">3</div>
+                            <div class="metric-label">Stops</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">147</div>
+                            <div class="metric-label">Minutes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vehicle-card">
+                    <div class="vehicle-header">Vehicle 2</div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 2, 1)">
+                        1. Aura Pizzas
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 2, 2)">
+                        2. The Chicken Junction
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 2, 3)">
+                        3. Masala Junction
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 2, 4)">
+                        4. Aura Pizzas
+                    </div>
+                    
+                    <div class="route-metrics">
+                        <div class="metric">
+                            <div class="metric-value">4</div>
+                            <div class="metric-label">Stops</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">134</div>
+                            <div class="metric-label">Minutes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vehicle-card">
+                    <div class="vehicle-header">Vehicle 3</div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 3, 1)">
+                        1. Tandoori Junction
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 3, 2)">
+                        2. DLF Phase 1
+                    </div>
+                    
+                    <div class="route-stop" 
+                         onclick="highlightStop(this, 3, 3)">
+                        3. Aura Pizzas
+                    </div>
+                    
+                    <div class="route-metrics">
+                        <div class="metric">
+                            <div class="metric-value">3</div>
+                            <div class="metric-label">Stops</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">0</div>
+                            <div class="metric-label">Minutes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+            
+            
+        <div class="section">
+            <h2 class="section-title">Premium Vehicle Deployment</h2>
+            <div class="premium-vehicle">
+                <h3>🌟 Premium Vehicle Route</h3>
+                <p><strong>Stops:</strong> 12</p>
+                <p><strong>Duration:</strong> 759.00 minutes</p>
+                <p><strong>Route:</strong> Shahdara -> Sikandarpur -> The Chicken Junction -> The Chicken Junction -> Aura Pizzas -> Tandoori Junction -> Sector 135 -> Aura Pizzas -> Sikandarpur -> Sector 135 -> Dilli Burger Adda -> Dilli Burger Adda</p>
+            </div>
+        </div>
+        
+            
+            <div class="section">
+                <h2 class="section-title">Simulation Timeline</h2>
+                <div class="timeline">
+                    
+        <div class="timeline-event">
+            <div class="event-time">09:00 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #1</strong> received for delivery to <strong>Shahdara</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">09:30 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #2</strong> received for delivery to <strong>Sikandarpur</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">09:45 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #3</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">09:45 AM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #3 to fleet using <strong>greedy</strong> method. Destination: Aura Pizzas</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:00 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #4</strong> received for delivery to <strong>DLF Phase 1</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:00 AM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #4 to fleet using <strong>greedy</strong> method. Destination: DLF Phase 1</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:15 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #5</strong> received for delivery to <strong>Dilli Burger Adda</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:15 AM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #5 to fleet using <strong>greedy</strong> method. Destination: Dilli Burger Adda</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:30 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #6</strong> received for delivery to <strong>Dilli Burger Adda</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:30 AM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #6 to fleet using <strong>greedy</strong> method. Destination: Dilli Burger Adda</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">10:45 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #7</strong> received for delivery to <strong>The Chicken Junction</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">11:00 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #8</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">11:00 AM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #8 to fleet using <strong>greedy</strong> method. Destination: Aura Pizzas</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">11:15 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #9</strong> received for delivery to <strong>Sector 4</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">11:15 AM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #9 to fleet using <strong>greedy</strong> method. Destination: Sector 4</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">11:30 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #10</strong> received for delivery to <strong>The Chicken Junction</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">11:45 AM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #11</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">12:00 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #12</strong> received for delivery to <strong>Dilli Burger Adda</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">12:00 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #12 to fleet using <strong>greedy</strong> method. Destination: Dilli Burger Adda</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">12:30 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #13</strong> received for delivery to <strong>Tandoori Junction</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">12:45 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #14</strong> received for delivery to <strong>Sector 135</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">01:00 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #15</strong> received for delivery to <strong>DLF Phase 1</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">01:00 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #15 to fleet using <strong>greedy</strong> method. Destination: DLF Phase 1</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">01:15 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #16</strong> received for delivery to <strong>Dilli Burger Adda</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">01:15 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #16 to fleet using <strong>greedy</strong> method. Destination: Dilli Burger Adda</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">01:30 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #17</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">01:45 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #18</strong> received for delivery to <strong>Sikandarpur</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">02:00 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #19</strong> received for delivery to <strong>Sector 135</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">02:15 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #20</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">02:15 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #20 to fleet using <strong>greedy</strong> method. Destination: Aura Pizzas</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">02:30 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #21</strong> received for delivery to <strong>Masala Junction</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">02:30 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #21 to fleet using <strong>greedy</strong> method. Destination: Masala Junction</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">02:45 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #22</strong> received for delivery to <strong>Dilli Burger Adda</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">03:00 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #23</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">03:00 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #23 to fleet using <strong>greedy</strong> method. Destination: Aura Pizzas</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">03:30 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #24</strong> received for delivery to <strong>Aura Pizzas</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">03:30 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #24 to fleet using <strong>greedy</strong> method. Destination: Aura Pizzas</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">03:45 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #25</strong> received for delivery to <strong>Dilli Burger Adda</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:00 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #26</strong> received for delivery to <strong>DLF Phase 1</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:00 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #26 to fleet using <strong>greedy</strong> method. Destination: DLF Phase 1</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:15 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #27</strong> received for delivery to <strong>Chittaranjan Park</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:15 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #27 to fleet using <strong>greedy</strong> method. Destination: Chittaranjan Park</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:30 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #28</strong> received for delivery to <strong>The Chicken Junction</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:30 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #28 to fleet using <strong>greedy</strong> method. Destination: The Chicken Junction</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:45 PM</div>
+            <span class="event-type event-new-order">New Order</span>
+            <div class="event-details"><strong>Order #29</strong> received for delivery to <strong>Tandoori Junction</strong></div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">04:45 PM</div>
+            <span class="event-type event-assignment">Assignment</span>
+            <div class="event-details"><span class='success-badge'>✓ ASSIGNED</span> Order #29 to fleet using <strong>greedy</strong> method. Destination: Tandoori Junction</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">08:30 PM</div>
+            <span class="event-type event-optimization">Optimization</span>
+            <div class="event-details">Layer 2 optimization completed. Fleet routes reoptimized for efficiency.</div>
+        </div>
+        
+        <div class="timeline-event">
+            <div class="event-time">05:00 PM</div>
+            <span class="event-type event-premium">Premium</span>
+            <div class="event-details"><span class='warning-badge'>PREMIUM DEPLOYMENT</span> Premium vehicle dispatched for 12 remaining orders.</div>
+        </div>
+        
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Route data from Python
+        const routesData = [{"vehicle_id": 0, "coordinates": [{"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}, {"lat": 28.5194775, "lng": 77.28112949999999, "address": "Dilli Burger Adda, DLF Phase 1, Delhi NCR", "type": "stop", "index": 8}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}], "color": "#667eea"}, {"vehicle_id": 1, "coordinates": [{"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}, {"lat": 28.5397842, "lng": 77.2489726, "address": "Chittaranjan Park, Delhi NCR", "type": "stop", "index": 6}, {"lat": 28.5366811, "lng": 77.2389135, "address": "Aura Pizzas, Greater Kailash 2 (GK2), Delhi NCR", "type": "stop", "index": 2}, {"lat": 28.5580188, "lng": 77.17871140000001, "address": "Sector 4, Delhi NCR", "type": "stop", "index": 16}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}], "color": "#28a745"}, {"vehicle_id": 2, "coordinates": [{"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}, {"lat": 28.524892, "lng": 77.1566051, "address": "Aura Pizzas, Vasant Kunj, Delhi NCR", "type": "stop", "index": 5}, {"lat": 28.6029202, "lng": 77.04925039999999, "address": "The Chicken Junction, Sector 4, Delhi NCR", "type": "stop", "index": 25}, {"lat": 28.6029202, "lng": 77.04925039999999, "address": "Masala Junction, Sector 4, Delhi NCR", "type": "stop", "index": 14}, {"lat": 28.6029202, "lng": 77.04925039999999, "address": "Aura Pizzas, Sector 4, Delhi NCR", "type": "stop", "index": 4}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}], "color": "#ffc107"}, {"vehicle_id": 3, "coordinates": [{"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "Tandoori Junction, DLF Phase 1, Delhi NCR", "type": "stop", "index": 19}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "DLF Phase 1, Delhi NCR", "type": "stop", "index": 7}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "Aura Pizzas, DLF Phase 1, Delhi NCR", "type": "stop", "index": 1}, {"lat": 28.4650453, "lng": 77.10071169999999, "address": "Swaad, DLF Phase 1, Delhi NCR", "type": "depot", "index": 0}], "color": "#dc3545"}];
+        const timeMatrix = [[0, 0, 64, 112, 54, 41, 66, 0, 72, 67, 94, 94, 94, 64, 54, 112, 54, 107, 157, 0, 66, 112, 54, 105, 106, 54, 106, 45], [0, 0, 64, 112, 54, 41, 66, 0, 72, 67, 94, 94, 94, 64, 54, 112, 54, 107, 157, 0, 66, 112, 54, 105, 106, 54, 106, 45], [61, 61, 0, 52, 56, 33, 10, 61, 21, 3, 51, 51, 51, 1, 56, 52, 25, 60, 87, 61, 6, 52, 56, 57, 50, 56, 50, 32], [101, 101, 54, 0, 95, 75, 51, 101, 41, 49, 55, 55, 55, 54, 95, 1, 63, 65, 92, 101, 57, 1, 95, 63, 48, 95, 48, 72], [43, 43, 56, 95, 0, 44, 58, 43, 78, 60, 79, 79, 79, 56, 1, 95, 36, 88, 129, 43, 60, 95, 1, 98, 87, 1, 87, 38], [37, 37, 34, 82, 48, 0, 35, 37, 49, 36, 78, 78, 78, 34, 48, 82, 21, 90, 110, 37, 36, 82, 48, 85, 75, 48, 75, 14], [61, 61, 6, 52, 60, 35, 0, 61, 19, 9, 55, 55, 55, 6, 60, 52, 27, 62, 86, 61, 6, 52, 60, 60, 50, 60, 50, 35], [0, 0, 64, 112, 54, 41, 66, 0, 72, 67, 94, 94, 94, 64, 54, 112, 54, 107, 157, 0, 66, 112, 54, 105, 106, 54, 106, 45], [67, 67, 23, 42, 78, 56, 20, 67, 0, 18, 65, 65, 65, 23, 78, 42, 48, 75, 90, 67, 22, 42, 78, 69, 56, 78, 56, 57], [63, 63, 8, 50, 58, 35, 8, 63, 18, 0, 55, 55, 55, 8, 58, 50, 27, 62, 89, 63, 6, 50, 58, 59, 52, 58, 52, 36], [92, 92, 51, 58, 78, 71, 53, 92, 59, 53, 0, 0, 0, 51, 78, 58, 54, 22, 78, 92, 52, 58, 78, 19, 31, 78, 31, 67], [92, 92, 51, 58, 78, 71, 53, 92, 59, 53, 0, 0, 0, 51, 78, 58, 54, 22, 78, 92, 52, 58, 78, 19, 31, 78, 31, 67], [92, 92, 51, 58, 78, 71, 53, 92, 59, 53, 0, 0, 0, 51, 78, 58, 54, 22, 78, 92, 52, 58, 78, 19, 31, 78, 31, 67], [61, 61, 1, 52, 56, 33, 10, 61, 21, 3, 51, 51, 51, 0, 56, 52, 25, 60, 87, 61, 6, 52, 56, 57, 50, 56, 50, 32], [43, 43, 56, 95, 1, 44, 58, 43, 78, 60, 79, 79, 79, 56, 0, 95, 36, 88, 129, 43, 60, 95, 1, 98, 87, 1, 87, 38], [101, 101, 54, 1, 95, 75, 51, 101, 41, 49, 55, 55, 55, 54, 95, 0, 63, 65, 92, 101, 57, 1, 95, 63, 48, 95, 48, 72], [50, 50, 26, 72, 44, 18, 28, 50, 43, 29, 62, 62, 62, 26, 44, 72, 0, 79, 96, 50, 28, 72, 44, 73, 59, 44, 59, 15], [101, 101, 62, 64, 98, 83, 64, 101, 73, 66, 20, 20, 20, 62, 98, 64, 64, 0, 78, 101, 64, 64, 98, 6, 31, 98, 31, 77], [142, 142, 89, 92, 139, 113, 91, 142, 92, 91, 87, 87, 87, 89, 139, 92, 91, 83, 0, 142, 91, 92, 139, 81, 72, 139, 72, 109], [0, 0, 64, 112, 54, 41, 66, 0, 72, 67, 94, 94, 94, 64, 54, 112, 54, 107, 157, 0, 66, 112, 54, 105, 106, 54, 106, 45], [61, 61, 4, 57, 56, 33, 6, 61, 22, 6, 51, 51, 51, 4, 56, 57, 25, 60, 87, 61, 0, 57, 56, 57, 50, 56, 50, 33], [101, 101, 54, 1, 95, 75, 51, 101, 41, 49, 55, 55, 55, 54, 95, 1, 63, 65, 92, 101, 57, 0, 95, 63, 48, 95, 48, 72], [43, 43, 56, 95, 1, 44, 58, 43, 78, 60, 79, 79, 79, 56, 1, 95, 36, 88, 129, 43, 60, 95, 0, 98, 87, 1, 87, 38], [103, 103, 61, 65, 94, 81, 62, 103, 74, 63, 23, 23, 23, 61, 94, 65, 69, 4, 82, 103, 63, 65, 94, 0, 32, 94, 32, 81], [82, 82, 42, 42, 76, 61, 45, 82, 50, 45, 26, 26, 26, 42, 76, 42, 45, 34, 67, 82, 44, 42, 76, 32, 0, 76, 0, 57], [43, 43, 56, 95, 1, 44, 58, 43, 78, 60, 79, 79, 79, 56, 1, 95, 36, 88, 129, 43, 60, 95, 1, 98, 87, 0, 87, 38], [82, 82, 42, 42, 76, 61, 45, 82, 50, 45, 26, 26, 26, 42, 76, 42, 45, 34, 67, 82, 44, 42, 76, 32, 0, 76, 0, 57], [39, 39, 33, 80, 40, 8, 34, 39, 49, 36, 71, 71, 71, 33, 40, 80, 14, 88, 110, 39, 35, 80, 40, 81, 71, 40, 71, 0]];
+        
+        let map;
+        let directionsService;
+        let directionsRenderers = [];
+        let markers = [];
+        let activeRoutes = new Set();
+        let selectedMarkers = [];
+
+        // --- NEW --- Variables for interactive highlighting
+        let mapMarkers = {};
+        let highlightRenderer = null;
+        let activeHighlightVehicle = null;
+        let selectedStopIndices = [];
+        
+        function initMap() {
+            // Initialize map centered on depot
+            const depotLocation = routesData.length > 0 && routesData[0].coordinates.length > 0
+                ? { lat: routesData[0].coordinates[0].lat, lng: routesData[0].coordinates[0].lng }
+                : { lat: 22.7196, lng: 75.8577 }; // Default to Indore
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: depotLocation,
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+            
+            directionsService = new google.maps.DirectionsService();
+
+            // --- NEW --- Initialize data structures for highlighting
+            routesData.forEach(route => {
+                mapMarkers[route.vehicle_id] = [];
+            });
+            
+            // Create vehicle toggle buttons
+            const toggleContainer = document.getElementById('vehicleToggles');
+            routesData.forEach((route, idx) => {
+                const button = document.createElement('button');
+                button.className = 'vehicle-toggle active';
+                button.textContent = `Vehicle ${route.vehicle_id}`;
+                button.style.borderColor = route.color;
+                button.onclick = () => toggleRoute(route.vehicle_id, button);
+                toggleContainer.appendChild(button);
+                activeRoutes.add(route.vehicle_id);
+            });
+            
+            // Display all routes initially
+            routesData.forEach(route => {
+                displayRoute(route);
+            });
+        }
+        
+        function toggleRoute(vehicleId, button) {
+            if (activeRoutes.has(vehicleId)) {
+                activeRoutes.delete(vehicleId);
+                button.classList.remove('active');
+            } else {
+                activeRoutes.add(vehicleId);
+                button.classList.add('active');
+            }
+            
+            // Clear and redraw
+            clearMap();
+            routesData.forEach(route => {
+                if (activeRoutes.has(route.vehicle_id)) {
+                    displayRoute(route);
+                }
+            });
+        }
+        
+        function displayRoute(routeData) {
+            const coords = routeData.coordinates;
+            if (coords.length < 2) return;
+            
+            // Create waypoints for Google Directions API
+            const origin = { lat: coords[0].lat, lng: coords[0].lng };
+            const destination = { lat: coords[coords.length - 1].lat, lng: coords[coords.length - 1].lng };
+            const waypoints = coords.slice(1, -1).map(coord => ({
+                location: { lat: coord.lat, lng: coord.lng },
+                stopover: true
+            }));
+            
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: routeData.color,
+                    strokeWeight: 5,
+                    strokeOpacity: 0.7
+                }
+            });
+            
+            const request = {
+                origin: origin,
+                destination: destination,
+                waypoints: waypoints,
+                travelMode: google.maps.TravelMode.DRIVING,
+                optimizeWaypoints: false
+            };
+            
+            directionsService.route(request, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    console.error('Directions request failed:', status);
+                    drawSimplePolyline(coords, routeData.color);
+                }
+            });
+            
+            directionsRenderers.push(directionsRenderer);
+            
+            // Add markers for each stop
+            coords.forEach((coord, idx) => {
+                const isDepot = coord.type === 'depot';
+                
+                // --- MODIFIED --- Enhanced marker styles for better visibility
+                const markerIcon = {
+                    path: isDepot ? google.maps.SymbolPath.FORWARD_CLOSED_ARROW : google.maps.SymbolPath.CIRCLE,
+                    rotation: isDepot ? -90 : 0, // Makes the depot a square
+                    fillColor: isDepot ? '#dc3545' : routeData.color,
+                    fillOpacity: 1,
+                    strokeColor: 'white',
+                    strokeWeight: 2.5,
+                    scale: isDepot ? 9 : 10 // Increased scale for stops
+                };
+
+                const marker = new google.maps.Marker({
+                    position: { lat: coord.lat, lng: coord.lng },
+                    map: map,
+                    title: coord.address,
+                    icon: markerIcon,
+                    label: { // Using a label object for better styling
+                        text: isDepot ? 'D' : (idx).toString(),
+                        color: 'white',
+                        fontSize: '11px',
+                        fontWeight: 'bold'
+                    }
+                });
+                
+                // --- NEW --- Store marker for highlighting interactivity
+                mapMarkers[routeData.vehicle_id][idx] = { marker, coord };
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px;">
+                            <strong>${isDepot ? 'Depot' : 'Stop ' + idx}</strong><br>
+                            ${coord.address}<br>
+                            <small>Vehicle ${routeData.vehicle_id}</small>
+                        </div>
+                    `
+                });
+                
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                    handleMarkerClick(marker, coord, routeData);
+                });
+                
+                markers.push({ marker, coord, routeData });
+            });
+        }
+        
+        function drawSimplePolyline(coords, color) {
+            const path = coords.map(c => ({ lat: c.lat, lng: c.lng }));
+            const polyline = new google.maps.Polyline({
+                path: path,
+                strokeColor: color,
+                strokeWeight: 4,
+                strokeOpacity: 0.7,
+                map: map
+            });
+        }
+        
+        function handleMarkerClick(marker, coord, routeData) {
+            if (selectedMarkers.length === 2) {
+                selectedMarkers = [];
+            }
+            
+            selectedMarkers.push({ marker, coord, routeData });
+            
+            if (selectedMarkers.length === 2) {
+                calculateSegmentInfo();
+            }
+        }
+        
+        function calculateSegmentInfo() {
+            const [first, second] = selectedMarkers;
+            
+            if (first.routeData.vehicle_id !== second.routeData.vehicle_id) {
+                document.getElementById('segmentDescription').textContent = 
+                    'Please select two stops from the same vehicle route.';
+                return;
+            }
+            
+            const route = first.routeData.coordinates;
+            const firstIdx = route.findIndex(c => 
+                c.lat === first.coord.lat && c.lng === first.coord.lng
+            );
+            const secondIdx = route.findIndex(c => 
+                c.lat === second.coord.lat && c.lng === second.coord.lng
+            );
+            
+            if (firstIdx === -1 || secondIdx === -1) return;
+            
+            const travelTime = timeMatrix[first.coord.index][second.coord.index];
+            const distance = calculateDistance(
+                first.coord.lat, first.coord.lng,
+                second.coord.lat, second.coord.lng
+            );
+            
+            const distanceInfo = document.getElementById('distanceInfo');
+            const distanceDetails = document.getElementById('distanceDetails');
+            
+            document.getElementById('segmentDescription').textContent = 
+                `Route segment from ${first.coord.address.split(',')[0]} to ${second.coord.address.split(',')[0]}`;
+            
+            distanceDetails.innerHTML = `
+                <div class="distance-detail">
+                    <div class="distance-label">Travel Time</div>
+                    <div class="distance-value">${travelTime.toFixed(1)} min</div>
+                </div>
+                <div class="distance-detail">
+                    <div class="distance-label">Distance</div>
+                    <div class="distance-value">${distance.toFixed(1)} km</div>
+                </div>
+                <div class="distance-detail">
+                    <div class="distance-label">Vehicle</div>
+                    <div class="distance-value">${first.routeData.vehicle_id}</div>
+                </div>
+                <div class="distance-detail">
+                    <div class="distance-label">Avg Speed</div>
+                    <div class="distance-value">${(distance / (travelTime / 60)).toFixed(1)} km/h</div>
+                </div>
+            `;
+            
+            distanceInfo.classList.add('active');
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function clearMap() {
+            directionsRenderers.forEach(renderer => renderer.setMap(null));
+            markers.forEach(m => m.marker.setMap(null));
+            directionsRenderers = [];
+            markers = [];
+            selectedMarkers = [];
+            document.getElementById('distanceInfo').classList.remove('active');
+        }
+
+        // --- NEW --- Functions for interactive highlighting
+        function highlightStop(element, vehicleId, routeIndex) {
+            if (vehicleId !== activeHighlightVehicle) {
+                // Switched to a new vehicle, so reset everything
+                document.querySelectorAll('.route-stop.highlighted').forEach(el => {
+                    el.classList.remove('highlighted');
+                });
+                selectedStopIndices = [];
+                activeHighlightVehicle = vehicleId;
+            }
+
+            // Toggle selection for the current stop
+            const selectionIndex = selectedStopIndices.indexOf(routeIndex);
+            if (selectionIndex > -1) {
+                selectedStopIndices.splice(selectionIndex, 1);
+                element.classList.remove('highlighted');
+            } else {
+                selectedStopIndices.push(routeIndex);
+                element.classList.add('highlighted');
+            }
+            
+            updateHighlightPath();
+        }
+
+        function updateHighlightPath() {
+            // 1. Clear previous highlights
+            if (highlightRenderer) {
+                highlightRenderer.setMap(null);
+                highlightRenderer = null;
+            }
+            for (const vId in mapMarkers) {
+                mapMarkers[vId].forEach(m => m.marker.setAnimation(null));
+            }
+
+            if (selectedStopIndices.length === 0 || activeHighlightVehicle === null) {
+                return; // Nothing to highlight
+            }
+
+            // 2. Animate selected markers
+            selectedStopIndices.forEach(idx => {
+                if (mapMarkers[activeHighlightVehicle] && mapMarkers[activeHighlightVehicle][idx]) {
+                    mapMarkers[activeHighlightVehicle][idx].marker.setAnimation(google.maps.Animation.BOUNCE);
+                }
+            });
+
+            // 3. Draw the highlighted path up to the furthest selected stop
+            const routeData = routesData.find(r => r.vehicle_id === activeHighlightVehicle);
+            if (!routeData) return;
+
+            const lastStopIndex = Math.max(...selectedStopIndices);
+            const highlightCoords = routeData.coordinates.slice(0, lastStopIndex + 1);
+
+            if (highlightCoords.length < 2) return;
+
+            const origin = { lat: highlightCoords[0].lat, lng: highlightCoords[0].lng };
+            const destination = { lat: highlightCoords[highlightCoords.length - 1].lat, lng: highlightCoords[highlightCoords.length - 1].lng };
+            const waypoints = highlightCoords.slice(1, -1).map(c => ({
+                location: { lat: c.lat, lng: c.lng },
+                stopover: true
+            }));
+            
+            highlightRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                preserveViewport: true, // Don't zoom/pan the map
+                polylineOptions: {
+                    strokeColor: '#e74c3c', // Bright red highlight
+                    strokeWeight: 8,
+                    strokeOpacity: 0.9,
+                    zIndex: 99
+                }
+            });
+
+            const request = {
+                origin: origin,
+                destination: destination,
+                waypoints: waypoints,
+                travelMode: google.maps.TravelMode.DRIVING,
+                optimizeWaypoints: false
+            };
+
+            directionsService.route(request, (result, status) => {
+                if (status === 'OK') {
+                    highlightRenderer.setDirections(result);
+                } else {
+                    console.error('Highlight directions request failed:', status);
+                }
+            });
+        }
+    </script>
+    
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_hI6BowrJPojeBiRldmuFVf3aqsSRZbg&callback=initMap">
+    </script>
+</body>
+</html>
