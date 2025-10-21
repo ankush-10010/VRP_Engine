@@ -14,15 +14,16 @@ NUM_VEHICLES = 4
 TIME_MATRIX_FILE = 'time_matrix.json'
 MAX_ROUTE_DURATION_MINS = 150
 MAX_STOPS_PER_ROUTE = 10
-LAYER_2_INTERVAL_SECONDS = 30
+LAYER_2_INTERVAL_SECONDS = 5
 OUTPUT_HTML_FILE = 'hybrid_simulation_live.html'
+GOOGLE_MAPS_API_KEY = 'AIzaSyC_hI6BowrJPojeBiRldmuFVf3aqsSRZbg'  # Replace with your Google Maps API key
 
 # --- Shared State ---
 current_routes = {}
 pending_orders = []
 state_lock = threading.Lock()
 simulation_running = True
-simulation_events = []  # Store all events for HTML generation
+simulation_events = []
 
 # --- HTML Generation Functions ---
 def format_time(minutes_from_start):
@@ -31,8 +32,75 @@ def format_time(minutes_from_start):
     result = start + timedelta(minutes=minutes_from_start)
     return result.strftime("%I:%M %p")
 
+def generate_route_coordinates(route, locations):
+    """Generate coordinate pairs for a route"""
+    coords = []
+    
+    # Determine the correct key names for coordinates
+    # Check if location has 'lat'/'lng' or 'latitude'/'longitude' or other variants
+    sample_loc = locations[0]
+    if 'lat' in sample_loc and 'lng' in sample_loc:
+        lat_key, lng_key = 'lat', 'lng'
+    elif 'latitude' in sample_loc and 'longitude' in sample_loc:
+        lat_key, lng_key = 'latitude', 'longitude'
+    elif 'lat' in sample_loc and 'lon' in sample_loc:
+        lat_key, lng_key = 'lat', 'lon'
+    else:
+        # Try to find coordinate keys
+        print(f"Available keys in location data: {sample_loc.keys()}")
+        raise KeyError(f"Could not find coordinate keys in location data. Available keys: {list(sample_loc.keys())}")
+    
+    # Add depot at start
+    coords.append({
+        'lat': locations[0][lat_key],
+        'lng': locations[0][lng_key],
+        'address': locations[0]['original_address'],
+        'type': 'depot',
+        'index': 0
+    })
+    # Add all stops
+    for idx in route:
+        coords.append({
+            'lat': locations[idx][lat_key],
+            'lng': locations[idx][lng_key],
+            'address': locations[idx]['original_address'],
+            'type': 'stop',
+            'index': idx
+        })
+    # Add depot at end
+    coords.append({
+        'lat': locations[0][lat_key],
+        'lng': locations[0][lng_key],
+        'address': locations[0]['original_address'],
+        'type': 'depot',
+        'index': 0
+    })
+    return coords
+
 def generate_html_report():
     """Generate comprehensive HTML report of the simulation"""
+    
+    # Prepare route data for map
+    map_routes = []
+    try:
+        with state_lock:
+            for v_id in sorted(current_routes.keys()):
+                route = current_routes[v_id]
+                if route:
+                    coords = generate_route_coordinates(route, all_locations)
+                    map_routes.append({
+                        'vehicle_id': v_id,
+                        'coordinates': coords,
+                        'color': ['#667eea', '#28a745', '#ffc107', '#dc3545'][v_id % 4]
+                    })
+    except Exception as e:
+        print(f"Warning: Could not generate map routes: {e}")
+        print(f"Sample location data: {all_locations[0] if all_locations else 'No locations'}")
+        map_routes = []
+    
+    # Convert to JSON for JavaScript
+    map_routes_json = json.dumps(map_routes)
+    time_matrix_json = json.dumps(time_matrix)
     
     html_template = """
 <!DOCTYPE html>
@@ -130,6 +198,84 @@ def generate_html_report():
             margin-bottom: 20px;
             padding-bottom: 10px;
             border-bottom: 3px solid #667eea;
+        }
+        
+        #map {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .map-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .vehicle-toggle {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .vehicle-toggle.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .vehicle-toggle:hover {
+            transform: scale(1.05);
+        }
+        
+        .distance-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .distance-info.active {
+            display: block;
+        }
+        
+        .distance-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .distance-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .distance-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .distance-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .distance-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
         }
         
         .timeline {
@@ -312,6 +458,42 @@ def generate_html_report():
             font-weight: bold;
             display: inline-block;
         }
+        
+        .map-legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+        }
+        
+        .legend-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .legend-icon.depot {
+            background: #dc3545;
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .legend-icon.stop {
+            background: #667eea;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -353,6 +535,31 @@ def generate_html_report():
             {{pending_orders_section}}
             
             <div class="section">
+                <h2 class="section-title">🗺️ Interactive Route Map</h2>
+                
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-icon depot">D</div>
+                        <span>Depot (Start/End Point)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon stop">●</div>
+                        <span>Delivery Stop</span>
+                    </div>
+                </div>
+                
+                <div class="map-controls" id="vehicleToggles"></div>
+                
+                <div id="map"></div>
+                
+                <div class="distance-info" id="distanceInfo">
+                    <h4>📍 Route Segment Information</h4>
+                    <p id="segmentDescription">Select two consecutive stops on a route to see travel details.</p>
+                    <div class="distance-details" id="distanceDetails"></div>
+                </div>
+            </div>
+            
+            <div class="section">
                 <h2 class="section-title">Final Fleet Status</h2>
                 <div class="vehicle-grid">
                     {{vehicle_cards}}
@@ -369,6 +576,263 @@ def generate_html_report():
             </div>
         </div>
     </div>
+    
+    <script>
+        // Route data from Python
+        const routesData = {{map_routes_json}};
+        const timeMatrix = {{time_matrix_json}};
+        
+        let map;
+        let directionsService;
+        let directionsRenderers = [];
+        let markers = [];
+        let activeRoutes = new Set();
+        let selectedMarkers = [];
+        
+        const vehicleColors = ['#667eea', '#28a745', '#ffc107', '#dc3545'];
+        
+        function initMap() {
+            // Initialize map centered on depot
+            const depotLocation = routesData.length > 0 && routesData[0].coordinates.length > 0
+                ? { lat: routesData[0].coordinates[0].lat, lng: routesData[0].coordinates[0].lng }
+                : { lat: 22.7196, lng: 75.8577 }; // Default to Indore
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: depotLocation,
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true
+            });
+            
+            directionsService = new google.maps.DirectionsService();
+            
+            // Create vehicle toggle buttons
+            const toggleContainer = document.getElementById('vehicleToggles');
+            routesData.forEach((route, idx) => {
+                const button = document.createElement('button');
+                button.className = 'vehicle-toggle active';
+                button.textContent = `Vehicle ${route.vehicle_id}`;
+                button.style.borderColor = route.color;
+                button.onclick = () => toggleRoute(route.vehicle_id, button);
+                toggleContainer.appendChild(button);
+                activeRoutes.add(route.vehicle_id);
+            });
+            
+            // Display all routes initially
+            routesData.forEach(route => {
+                displayRoute(route);
+            });
+        }
+        
+        function toggleRoute(vehicleId, button) {
+            if (activeRoutes.has(vehicleId)) {
+                activeRoutes.delete(vehicleId);
+                button.classList.remove('active');
+            } else {
+                activeRoutes.add(vehicleId);
+                button.classList.add('active');
+            }
+            
+            // Clear and redraw
+            clearMap();
+            routesData.forEach(route => {
+                if (activeRoutes.has(route.vehicle_id)) {
+                    displayRoute(route);
+                }
+            });
+        }
+        
+        function displayRoute(routeData) {
+            const coords = routeData.coordinates;
+            if (coords.length < 2) return;
+            
+            // Create waypoints for Google Directions API
+            const origin = { lat: coords[0].lat, lng: coords[0].lng };
+            const destination = { lat: coords[coords.length - 1].lat, lng: coords[coords.length - 1].lng };
+            const waypoints = coords.slice(1, -1).map(coord => ({
+                location: { lat: coord.lat, lng: coord.lng },
+                stopover: true
+            }));
+            
+            const directionsRenderer = new google.maps.DirectionsRenderer({
+                map: map,
+                suppressMarkers: true,
+                polylineOptions: {
+                    strokeColor: routeData.color,
+                    strokeWeight: 4,
+                    strokeOpacity: 0.7
+                }
+            });
+            
+            const request = {
+                origin: origin,
+                destination: destination,
+                waypoints: waypoints,
+                travelMode: google.maps.TravelMode.DRIVING,
+                optimizeWaypoints: false
+            };
+            
+            directionsService.route(request, (result, status) => {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
+                } else {
+                    console.error('Directions request failed:', status);
+                    // Fallback to simple polyline
+                    drawSimplePolyline(coords, routeData.color);
+                }
+            });
+            
+            directionsRenderers.push(directionsRenderer);
+            
+            // Add markers for each stop
+            coords.forEach((coord, idx) => {
+                const isDepot = coord.type === 'depot';
+                
+                const marker = new google.maps.Marker({
+                    position: { lat: coord.lat, lng: coord.lng },
+                    map: map,
+                    title: coord.address,
+                    icon: {
+                        path: isDepot ? google.maps.SymbolPath.BACKWARD_CLOSED_ARROW : google.maps.SymbolPath.CIRCLE,
+                        fillColor: isDepot ? '#dc3545' : routeData.color,
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2,
+                        scale: isDepot ? 8 : 6,
+                        rotation: isDepot ? 0 : 0
+                    },
+                    label: isDepot ? 'D' : (idx).toString()
+                });
+                
+                // Create info window
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 10px;">
+                            <strong>${isDepot ? 'Depot' : 'Stop ' + idx}</strong><br>
+                            ${coord.address}<br>
+                            <small>Vehicle ${routeData.vehicle_id}</small>
+                        </div>
+                    `
+                });
+                
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                    handleMarkerClick(marker, coord, routeData);
+                });
+                
+                markers.push({ marker, coord, routeData });
+            });
+        }
+        
+        function drawSimplePolyline(coords, color) {
+            const path = coords.map(c => ({ lat: c.lat, lng: c.lng }));
+            const polyline = new google.maps.Polyline({
+                path: path,
+                strokeColor: color,
+                strokeWeight: 4,
+                strokeOpacity: 0.7,
+                map: map
+            });
+        }
+        
+        function handleMarkerClick(marker, coord, routeData) {
+            // Handle two-marker selection for distance calculation
+            if (selectedMarkers.length === 2) {
+                // Reset previous selection
+                selectedMarkers = [];
+            }
+            
+            selectedMarkers.push({ marker, coord, routeData });
+            
+            if (selectedMarkers.length === 2) {
+                calculateSegmentInfo();
+            }
+        }
+        
+        function calculateSegmentInfo() {
+            const [first, second] = selectedMarkers;
+            
+            // Check if both markers are from the same route
+            if (first.routeData.vehicle_id !== second.routeData.vehicle_id) {
+                document.getElementById('segmentDescription').textContent = 
+                    'Please select two stops from the same vehicle route.';
+                return;
+            }
+            
+            // Find indices in route
+            const route = first.routeData.coordinates;
+            const firstIdx = route.findIndex(c => 
+                c.lat === first.coord.lat && c.lng === first.coord.lng
+            );
+            const secondIdx = route.findIndex(c => 
+                c.lat === second.coord.lat && c.lng === second.coord.lng
+            );
+            
+            if (firstIdx === -1 || secondIdx === -1) return;
+            
+            // Get travel time from time matrix
+            const travelTime = timeMatrix[first.coord.index][second.coord.index];
+            
+            // Calculate distance (approximate)
+            const distance = calculateDistance(
+                first.coord.lat, first.coord.lng,
+                second.coord.lat, second.coord.lng
+            );
+            
+            // Display info
+            const distanceInfo = document.getElementById('distanceInfo');
+            const distanceDetails = document.getElementById('distanceDetails');
+            
+            document.getElementById('segmentDescription').textContent = 
+                `Route segment from ${first.coord.address.split(',')[0]} to ${second.coord.address.split(',')[0]}`;
+            
+            distanceDetails.innerHTML = `
+                <div class="distance-detail">
+                    <div class="distance-label">Travel Time</div>
+                    <div class="distance-value">${travelTime.toFixed(1)} min</div>
+                </div>
+                <div class="distance-detail">
+                    <div class="distance-label">Distance</div>
+                    <div class="distance-value">${distance.toFixed(1)} km</div>
+                </div>
+                <div class="distance-detail">
+                    <div class="distance-label">Vehicle</div>
+                    <div class="distance-value">${first.routeData.vehicle_id}</div>
+                </div>
+                <div class="distance-detail">
+                    <div class="distance-label">Avg Speed</div>
+                    <div class="distance-value">${(distance / (travelTime / 60)).toFixed(1)} km/h</div>
+                </div>
+            `;
+            
+            distanceInfo.classList.add('active');
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function clearMap() {
+            directionsRenderers.forEach(renderer => renderer.setMap(null));
+            markers.forEach(m => m.marker.setMap(null));
+            directionsRenderers = [];
+            markers = [];
+            selectedMarkers = [];
+            document.getElementById('distanceInfo').classList.remove('active');
+        }
+    </script>
+    
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{google_api_key}}&callback=initMap">
+    </script>
 </body>
 </html>
 """
@@ -483,6 +947,9 @@ def generate_html_report():
     html_content = html_content.replace('{{vehicle_cards}}', vehicle_cards_html)
     html_content = html_content.replace('{{premium_section}}', premium_section)
     html_content = html_content.replace('{{timeline_events}}', timeline_html)
+    html_content = html_content.replace('{{map_routes_json}}', map_routes_json)
+    html_content = html_content.replace('{{time_matrix_json}}', time_matrix_json)
+    html_content = html_content.replace('{{google_api_key}}', GOOGLE_MAPS_API_KEY)
     
     with open(OUTPUT_HTML_FILE, 'w', encoding='utf-8') as f:
         f.write(html_content)
