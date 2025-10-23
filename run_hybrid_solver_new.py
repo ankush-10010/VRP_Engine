@@ -22,8 +22,8 @@ NUM_VEHICLES = 12
 TIME_MATRIX_FILE = 'time_matrix.json' # Or 'time_matrix_custom.json'
 
 # --- NEW: Capacity & Real Order Data ---
-VEHICLE_CAPACITY = 90         # Max number of "units" per vehicle
-MAX_ROUTE_DURATION_MINS = 2000 # Max drive time
+VEHICLE_CAPACITY = 20         # Max number of "units" per vehicle
+MAX_ROUTE_DURATION_MINS = 20000 # Max drive time
 PREPROCESSED_ORDER_FILE = 'preprocessed_orders.csv'
 # --- Select the day you want to simulate ---
 # (From your data, Sept 10 2024 is day 254)

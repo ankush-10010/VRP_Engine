@@ -291,8 +291,12 @@ def batch_optimization_vrp(current_routes, pending_orders, time_matrix,
                          num_vehicles, vehicle_capacity, max_route_duration_mins):
     """
     Re-optimizes all current routes AND tries to include pending orders.
-    This is the main Layer 2 function.
-    (Unchanged from previous capacity-aware version)
+    
+    *** NEW LOGIC ***
+    This version treats every individual ORDER as a unique stop.
+    This solves the "super-order" problem where demand for one location
+    (e.g., 50 units for Aura Pizzas) exceeds a single vehicle's capacity (e.g., 20).
+    The solver can now create multiple routes to the same location.
     """
     
     # 1. Combine all orders (from routes + pending) into one big list
@@ -306,46 +310,48 @@ def batch_optimization_vrp(current_routes, pending_orders, time_matrix,
 
     # 2. Create the "Solver Data Model"
     
-    # We need to map our "original" location indices (e.g., 3, 5, 20)
-    # to "solver" indices (e.g., 1, 2, 3). Depot is always index 0.
+    # The "solver locations" are now the DEPOT (index 0) + all individual orders.
+    # If we have 79 orders, we have 80 "solver locations".
+    num_orders = len(all_orders_to_assign)
+    num_solver_locs = num_orders + 1 # (Depot + all orders)
     
-    # Get all unique "original" stop indices
-    original_stop_indices = sorted(list(set([o['index'] for o in all_orders_to_assign])))
-    
-    # Create the list of all locations for the solver (Depot + Stops)
-    solver_locations = [0] + original_stop_indices 
-    
-    # Create mapping dictionaries
-    # {orig_idx: solver_idx} e.g., {0:0, 3:1, 5:2, 20:3}
-    map_orig_to_solver = {orig_idx: i for i, orig_idx in enumerate(solver_locations)}
-    # {solver_idx: orig_idx} e.g., {0:0, 1:3, 2:5, 3:20}
-    map_solver_to_orig = {i: orig_idx for i, orig_idx in enumerate(solver_locations)}
-
-    num_solver_locs = len(solver_locations)
+    # Create mapping
+    # map_solver_to_order[1] -> all_orders_to_assign[0]
+    # map_solver_to_order[2] -> all_orders_to_assign[1]
+    # ...
+    # (index 0 is reserved for the depot)
+    map_solver_to_order = {i + 1: order for i, order in enumerate(all_orders_to_assign)}
 
     # 3. Build the inputs for the solver engine
     
-    # a) Solver Time Matrix (a smaller matrix)
+    # a) Solver Time Matrix (an (N+1) x (N+1) matrix)
     solver_time_matrix = [[0] * num_solver_locs for _ in range(num_solver_locs)]
+    
+    # This is now a big loop.
     for i in range(num_solver_locs):
         for j in range(num_solver_locs):
-            orig_i = map_solver_to_orig[i]
-            orig_j = map_solver_to_orig[j]
-            solver_time_matrix[i][j] = time_matrix[orig_i][orig_j]
+            if i == j:
+                continue
+                
+            # Get the "original" location index (from all_locations)
+            if i == 0 and j > 0:
+                # Depot to Order
+                order_j_loc_idx = map_solver_to_order[j]['index']
+                solver_time_matrix[i][j] = time_matrix[0][order_j_loc_idx]
+            elif i > 0 and j == 0:
+                # Order to Depot
+                order_i_loc_idx = map_solver_to_order[i]['index']
+                solver_time_matrix[i][j] = time_matrix[order_i_loc_idx][0]
+            elif i > 0 and j > 0:
+                # Order to Order
+                order_i_loc_idx = map_solver_to_order[i]['index']
+                order_j_loc_idx = map_solver_to_order[j]['index']
+                solver_time_matrix[i][j] = time_matrix[order_i_loc_idx][order_j_loc_idx]
             
     # b) Solver Demands List (one entry for each solver location)
-    solver_demands = [0] * num_solver_locs
-    # This holds orders grouped by their *original* index
-    order_pool = {idx: [] for idx in original_stop_indices}
-    
-    for order in all_orders_to_assign:
-        order_orig_idx = order['index']
-        solver_idx = map_orig_to_solver[order_orig_idx]
-        
-        # Add demand to the solver demand list
-        solver_demands[solver_idx] += order['demand']
-        # Add the full order object to our pool, to rebuild routes later
-        order_pool[order_orig_idx].append(order)
+    # The demand for the depot (index 0) is 0.
+    # The demand for solver_loc 1 is the demand of order 1.
+    solver_demands = [0] + [order['demand'] for order in all_orders_to_assign]
 
     # c) Vehicle Capacities & Durations
     vehicle_capacities = [vehicle_capacity] * num_vehicles
@@ -353,6 +359,7 @@ def batch_optimization_vrp(current_routes, pending_orders, time_matrix,
     vehicle_max_durations_sec = [int(max_route_duration_mins * 60)] * num_vehicles
 
     # 4. Call the Solver Engine!
+    # The solver now sees 80 locations, each with its own small demand.
     solution_routes_solver, unassigned_solver_indices = solve_vrp_with_capacity(
         solver_time_matrix,
         solver_demands,
@@ -365,31 +372,42 @@ def batch_optimization_vrp(current_routes, pending_orders, time_matrix,
     
     new_optimized_routes = {i: [] for i in range(num_vehicles)}
     
+    # Keep track of which orders (by solver index) were assigned
+    assigned_solver_indices = set()
+    
     for v_id, vehicle_route_solver in enumerate(solution_routes_solver):
         for solver_stop_idx in vehicle_route_solver:
-            # Convert solver index (e.g., 2) back to original index (e.g., 5)
-            original_stop_idx = map_solver_to_orig[solver_stop_idx]
+            # solver_stop_idx is a solver index, e.g., 1, 2, ... 79
             
-            # Get all orders for this stop from our pool
-            # .pop() ensures we don't assign the same orders twice
-            orders_for_this_stop = order_pool.pop(original_stop_idx, [])
+            # Get the full order object from our map
+            order_obj = map_solver_to_order.get(solver_stop_idx)
             
-            if orders_for_this_stop:
-                new_optimized_routes[v_id].extend(orders_for_this_stop)
+            if order_obj:
+                new_optimized_routes[v_id].append(order_obj)
+                assigned_solver_indices.add(solver_stop_idx)
 
     # 6. Find any orders that were *not* assigned
-    # Any orders left in the pool (or returned by solver) are unassigned
     final_unassigned_orders = []
-    for orig_idx_solver in unassigned_solver_indices:
-        # Convert solver index back to original index
-        original_stop_idx = map_solver_to_orig.get(orig_idx_solver)
-        if original_stop_idx:
-            orders = order_pool.pop(original_stop_idx, [])
-            final_unassigned_orders.extend(orders)
-        
-    # Also add any remaining in the pool (should be empty, but good practice)
-    for orders in order_pool.values():
-        final_unassigned_orders.extend(orders)
+    
+    # Check any orders returned by the solver
+    for unassigned_idx in unassigned_solver_indices:
+        order_obj = map_solver_to_order.get(unassigned_idx)
+        if order_obj:
+            final_unassigned_orders.append(order_obj)
+            
+    # Also check our *original* list for any orders not in the "assigned" set
+    for solver_idx, order_obj in map_solver_to_order.items():
+        if solver_idx not in assigned_solver_indices and solver_idx not in unassigned_solver_indices:
+            # This order was not in *any* solution route
+            final_unassigned_orders.append(order_obj)
 
-    return new_optimized_routes, final_unassigned_orders
+    # De-duplicate the unassigned list
+    final_unassigned_orders_deduped = []
+    seen_ids = set()
+    for order in final_unassigned_orders:
+        if order['id'] not in seen_ids:
+            final_unassigned_orders_deduped.append(order)
+            seen_ids.add(order['id'])
+
+    return new_optimized_routes, final_unassigned_orders_deduped
 
