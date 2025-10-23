@@ -23,7 +23,7 @@ TIME_MATRIX_FILE = 'time_matrix.json' # Or 'time_matrix_custom.json'
 
 # --- NEW: Capacity & Real Order Data ---
 VEHICLE_CAPACITY = 20         # Max number of "units" per vehicle
-MAX_ROUTE_DURATION_MINS = 20000 # Max drive time
+MAX_ROUTE_DURATION_MINS = 200 # Max drive time
 PREPROCESSED_ORDER_FILE = 'preprocessed_orders.csv'
 # --- Select the day you want to simulate ---
 # (From your data, Sept 10 2024 is day 254)
@@ -319,6 +319,174 @@ def generate_html_report():
         .log-table tr:hover {
             background-color: #f1f1f1;
         }
+
+        /* --- COLLAPSIBLE SECTIONS STYLES --- */
+        .collapsible-section {
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .collapsible-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+        
+        .collapsible-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+        }
+        
+        .collapsible-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .collapsible-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s ease;
+        }
+        
+        .collapsible-icon.expanded {
+            transform: rotate(180deg);
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: white;
+        }
+        
+        .collapsible-content.expanded {
+            max-height: 2000px;
+            padding: 25px;
+        }
+        
+        .collapsible-content.collapsed {
+            max-height: 0;
+            padding: 0 25px;
+        }
+        
+        /* Central Controls */
+        .central-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+        
+        .central-controls h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 1.3em;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .control-btn.expand-all {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .control-btn.expand-all:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        
+        .control-btn.collapse-all {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+        
+        .control-btn.collapse-all:hover {
+            background: linear-gradient(135deg, #c82333 0%, #e8650e 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+        
+        .control-btn.toggle-all {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .control-btn.toggle-all:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Section-specific styling */
+        .section-icon {
+            font-size: 1.3em;
+            margin-right: 8px;
+        }
+        
+        .fleet-status-content {
+            padding: 0;
+        }
+        
+        .timeline-content {
+            padding: 0;
+        }
+        
+        .log-content {
+            padding: 0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .control-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .control-btn {
+                width: 200px;
+            }
+            
+            .collapsible-header {
+                padding: 15px 20px;
+            }
+            
+            .collapsible-title {
+                font-size: 1.2em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -359,6 +527,22 @@ def generate_html_report():
         <div class="content">
             {{pending_orders_section}}
             
+            <!-- Central Controls -->
+            <div class="central-controls">
+                <h3>📋 Section Controls</h3>
+                <div class="control-buttons">
+                    <button class="control-btn expand-all" onclick="expandAllSections()">
+                        📖 Expand All
+                    </button>
+                    <button class="control-btn collapse-all" onclick="collapseAllSections()">
+                        📕 Collapse All
+                    </button>
+                    <button class="control-btn toggle-all" onclick="toggleAllSections()">
+                        🔄 Toggle All
+                    </button>
+                </div>
+            </div>
+            
             <div class="section">
                 <h2 class="section-title">🗺️ Interactive Route Map (Final State at 10:00 PM)</h2>
                 <div class="map-legend">
@@ -378,21 +562,51 @@ def generate_html_report():
                 </div>
             </div>
 
-            {{historical_log_section}}
+            <!-- Historical Order Assignment Log Section -->
+            <div class="collapsible-section" id="historical-log-section">
+                <div class="collapsible-header" onclick="toggleSection('historical-log-section')">
+                    <h3 class="collapsible-title">
+                        <span class="section-icon">📈</span>
+                        Historical Order Assignment Log
+                    </h3>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content log-content" id="historical-log-content">
+                    {{historical_log_section}}
+                </div>
+            </div>
 
-            <div class="section">
-                <h2 class="section-title">Final Fleet Status (Snapshot at 10:00 PM)</h2>
-                <div class="vehicle-grid">
-                    {{vehicle_cards}}
+            <!-- Final Fleet Status Section -->
+            <div class="collapsible-section" id="fleet-status-section">
+                <div class="collapsible-header" onclick="toggleSection('fleet-status-section')">
+                    <h3 class="collapsible-title">
+                        <span class="section-icon">🚚</span>
+                        Final Fleet Status (Snapshot at 10:00 PM)
+                    </h3>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content fleet-status-content" id="fleet-status-content">
+                    <div class="vehicle-grid">
+                        {{vehicle_cards}}
+                    </div>
                 </div>
             </div>
             
             {{premium_section}} 
             
-            <div class="section">
-                <h2 class="section-title">Simulation Event Timeline</h2>
-                <div class="timeline">
-                    {{timeline_events}}
+            <!-- Simulation Event Timeline Section -->
+            <div class="collapsible-section" id="timeline-section">
+                <div class="collapsible-header" onclick="toggleSection('timeline-section')">
+                    <h3 class="collapsible-title">
+                        <span class="section-icon">⏰</span>
+                        Simulation Event Timeline
+                    </h3>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content timeline-content" id="timeline-content">
+                    <div class="timeline">
+                        {{timeline_events}}
+                    </div>
                 </div>
             </div>
         </div>
@@ -413,6 +627,13 @@ def generate_html_report():
         let highlightRenderer = null;
         let activeHighlightVehicle = null;
         let selectedStopIndices = [];
+        
+        // Collapsible sections state
+        let sectionStates = {
+            'historical-log-section': false,
+            'fleet-status-section': false,
+            'timeline-section': false
+        };
         
         function initMap() {
             const depotLocation = routesData.length > 0 && routesData[0].coordinates.length > 0
@@ -663,6 +884,63 @@ def generate_html_report():
                 if (status === 'OK') { highlightRenderer.setDirections(result); }
             });
         }
+        
+        // Collapsible sections functionality
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const content = document.getElementById(sectionId.replace('-section', '-content'));
+            const icon = section.querySelector('.collapsible-icon');
+            const isExpanded = sectionStates[sectionId];
+            
+            if (isExpanded) {
+                // Collapse
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                icon.classList.remove('expanded');
+                sectionStates[sectionId] = false;
+            } else {
+                // Expand
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.classList.add('expanded');
+                sectionStates[sectionId] = true;
+            }
+        }
+        
+        function expandAllSections() {
+            Object.keys(sectionStates).forEach(sectionId => {
+                if (!sectionStates[sectionId]) {
+                    toggleSection(sectionId);
+                }
+            });
+        }
+        
+        function collapseAllSections() {
+            Object.keys(sectionStates).forEach(sectionId => {
+                if (sectionStates[sectionId]) {
+                    toggleSection(sectionId);
+                }
+            });
+        }
+        
+        function toggleAllSections() {
+            const allExpanded = Object.values(sectionStates).every(state => state);
+            if (allExpanded) {
+                collapseAllSections();
+            } else {
+                expandAllSections();
+            }
+        }
+        
+        // Initialize sections as collapsed on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            Object.keys(sectionStates).forEach(sectionId => {
+                const content = document.getElementById(sectionId.replace('-section', '-content'));
+                if (content) {
+                    content.classList.add('collapsed');
+                }
+            });
+        });
     </script>
     
     <script async defer
@@ -802,10 +1080,8 @@ def generate_html_report():
         """
     historical_log_html = ""
     if global_order_assignments_log:
-        historical_log_html = """
-        <div class="section">
-            <h2 class="section-title">📈 Historical Order Assignment Log</h2>
-            <p>Shows every individual order assignment that occurred during the day. (Total: {{assigned_orders}})</p>
+        historical_log_html = f"""
+            <p>Shows every individual order assignment that occurred during the day. (Total: {len(global_order_assignments_log)})</p>
             <table class="log-table">
                 <thead>
                     <tr>
@@ -833,7 +1109,7 @@ def generate_html_report():
                     </tr>
             """
         
-        historical_log_html += "</tbody></table></div>"
+        historical_log_html += "</tbody></table>"
     else:
         historical_log_html = "<p>No historical trips were logged.</p>"
     # --- 6. Fill in Template ---
