@@ -4,6 +4,7 @@ import json
 import threading
 import pandas as pd
 from datetime import datetime, timedelta
+import copy
 # We will import the new functions from our updated solver
 from hybrid_solver_layers import (
     assign_new_order_realtime, 
@@ -35,8 +36,8 @@ LAYER_2_INTERVAL_SECONDS = 60 # Run background re-optimization every 60s
 OUTPUT_HTML_FILE = 'outputs/hybrid_simulation_live_capacity.html'
 
 # --- Cost Parameters ---
-FIXED_COST_PER_TRUCK = 5000  # Example cost (e.g., rupees per day)
-VARIABLE_COST_PER_KM = 15   # Example cost (e.g., rupees per km for fuel, maintenance)
+FIXED_COST_PER_TRUCK = 100  # Example cost (e.g., rupees per day)
+VARIABLE_COST_PER_KM = 1   # Example cost (e.g., rupees per km for fuel, maintenance)
 
 # --- Distance Matrix (Crucial for Cost Calculation) ---
 # We assume you have or can generate a distance matrix similar to your time matrix.
@@ -44,6 +45,9 @@ VARIABLE_COST_PER_KM = 15   # Example cost (e.g., rupees per km for fuel, mainte
 DISTANCE_MATRIX_FILE = 'distance_matrix.json' # Or load from the same file if combined
 distance_matrix = [] # This will be loaded
 
+# --- Debug Flag ---
+# Set to True for detailed L1 assignment logs, False for less verbose output
+DETAILED_DEBUG = True
 
 # --- Shared State ---
 # current_routes holds a list of full order objects for each vehicle
@@ -1214,7 +1218,7 @@ def parallel_optimization_worker():
                 # Use the function from hybrid_solver_new
                 opt_routes, unassigned = run_alns_optimization( # Using the placeholder
                     routes_to_optimize, pending_to_optimize, time_matrix, distance_matrix, # Pass distance_matrix
-                    NUM_VEHICLES, VEHICLE_CAPACITY, MAX_ROUTE_DURATION_MINS
+                    NUM_VEHICLES, VEHICLE_CAPACITY, MAX_ROUTE_DURATION_MINS,FIXED_COST_PER_TRUCK,VARIABLE_COST_PER_KM
                     # Add your ALNS params here if needed
                 )
                 l3_results['routes'] = opt_routes
@@ -1418,44 +1422,94 @@ def run_hybrid_simulation():
             print(f"Total {orders_this_tick} new orders this tick. Total pending: {len(pending_orders)}")
         
         # --- B: Try to assign pending orders (Layer 1) ---
+        assigned_this_tick = False # Flag to track if any L1 assignment happened this tick
         if pending_orders:
-            # We iterate on a copy because we'll be removing items
+            # Iterate on a copy because we might remove items
             for order_to_assign in pending_orders[:]:
+                # Double-check if the order still exists in the main list
+                # (it might have been assigned by L2/L3 running in the background)
                 if order_to_assign not in pending_orders:
-                    continue # Was assigned by L2 in the background
-                    
-                print(f"\n[LAYER 1] Attempting to assign Order #{order_to_assign['id']} (Demand: {order_to_assign['demand']})...")
-                routes_before_assignment = {}
-                # with state_lock:
-                #     # Get a deep copy of the routes *before* the solver runs
-                #     routes_before_assignment = {vid: r[:] for vid, r in current_routes.items()}
-                with state_lock:
-                    # Pass the full order object and capacity constraints
-                    final_routes, method = assign_new_order_realtime(
-                        order_to_assign, 
-                        current_routes, 
-                        time_matrix,
-                        VEHICLE_CAPACITY, 
-                        MAX_ROUTE_DURATION_MINS
-                    )
+                    continue
 
-                if final_routes: # If assignment was successful
+                # --- Start Debug Logging (Optional based on DETAILED_DEBUG flag) ---
+                if DETAILED_DEBUG:
+                    print(f"\n[L1 DEBUG] === Attempting Order {order_to_assign['id']} (Demand: {order_to_assign['demand']}) ===")
+                    # Optional: Print current vehicle loads before trying assignment
+                    # with state_lock:
+                    #     for v_id_debug, r_debug in current_routes.items():
+                    #         if r_debug:
+                    #             load_debug = sum(o['demand'] for o in r_debug)
+                    #             print(f"  Vehicle {v_id_debug} before: Load={load_debug}/{VEHICLE_CAPACITY}, Stops={len(r_debug)}")
+                else:
+                    print(f"\n[LAYER 1] Attempting to assign Order #{order_to_assign['id']}...")
+                # --- End Debug Logging ---
+
+                # Safely get a copy of routes *before* calling the solver
+                with state_lock:
+                    routes_before_l1 = copy.deepcopy(current_routes)
+
+                # Call Layer 1 solver (Greedy + Tabu)
+                final_routes, method = assign_new_order_realtime(
+                    order_to_assign,
+                    routes_before_l1, # Pass the copy
+                    time_matrix,
+                    VEHICLE_CAPACITY,
+                    MAX_ROUTE_DURATION_MINS
+                )
+
+                # --- Process Assignment Result ---
+                if final_routes: # Assignment was successful
+                    assigned_this_tick = True # Mark that an assignment occurred
                     order_location = all_locations[order_to_assign['index']]['original_address'].split(',')[0]
-                    print(f"SUCCESS (L1): Order #{order_to_assign['id']} assigned via {method} method.")
-                    
-                    # --- NEW LOGIC: FIND WHICH VEHICLE CHANGED ---
+
+                    # --- Logic to find which vehicle the order was assigned to ---
                     assigned_vehicle_id = -1
                     newly_assigned_order_id = order_to_assign['id']
-                    
-                    for v_id, new_route in final_routes.items():
-                        new_route_ids = [o['id'] for o in new_route]
-                        if newly_assigned_order_id in new_route_ids:
-                            assigned_vehicle_id = v_id
-                            break
+                    changed_route_details = "" # For debug log
 
+                    try:
+                        # Compare the 'after' state (final_routes) with the 'before' state (routes_before_l1)
+                        for v_id, new_route in final_routes.items():
+                            old_route = routes_before_l1.get(v_id, [])
+                            # Check if this specific route list is different
+                            if new_route != old_route:
+                                # Now, verify the new order is actually in this changed route
+                                if isinstance(new_route, list):
+                                    new_route_ids = {o['id'] for o in new_route} # Use set for faster lookup
+                                    if newly_assigned_order_id in new_route_ids:
+                                        assigned_vehicle_id = v_id
+                                        # Prepare debug details if needed
+                                        if DETAILED_DEBUG:
+                                            old_load = sum(o['demand'] for o in old_route)
+                                            new_load = sum(o['demand'] for o in new_route)
+                                            changed_route_details = (f"Vehicle {v_id}: "
+                                                                       f"Load {old_load}->{new_load}/{VEHICLE_CAPACITY}, "
+                                                                       f"Stops {len(old_route)}->{len(new_route)}")
+                                        break # Found the vehicle, exit loop
+                                else:
+                                    # This case indicates a potential bug in assign_new_order_realtime if it returns non-list routes
+                                    print(f"ERROR: final_routes[{v_id}] type mismatch. Got {type(new_route)}")
+                                    assigned_vehicle_id = -99 # Use error code
+                                    break
+                    except Exception as e:
+                        print(f"ERROR: Exception while finding assigned_vehicle_id for order {newly_assigned_order_id}: {e}")
+                        assigned_vehicle_id = -99 # Use error code
+                    # --- End vehicle finding logic ---
+
+                    # Log success message
+                    if assigned_vehicle_id != -1 and assigned_vehicle_id != -99:
+                        print(f"SUCCESS (L1): Order #{newly_assigned_order_id} assigned via {method} method to Vehicle {assigned_vehicle_id}.")
+                        if DETAILED_DEBUG:
+                            print(f"  [L1 DEBUG] {changed_route_details}")
+                    elif assigned_vehicle_id == -99:
+                        print(f"SUCCESS (L1): Order #{newly_assigned_order_id} assigned via {method} method, but ERROR finding vehicle ID.")
+                    else: # assigned_vehicle_id is still -1
+                        print(f"ERROR: Order {newly_assigned_order_id} reported SUCCESS but assigned_vehicle_id not found in final_routes!")
+
+                    # --- Update state and logs safely ---
                     with state_lock:
-                        # --- ADD TO NEW ASSIGNMENT LOG ---
-                        if assigned_vehicle_id != -1:
+                        # Log to historical assignment log only if vehicle found
+                        if assigned_vehicle_id != -1 and assigned_vehicle_id != -99:
                             global_order_assignments_log.append({
                                 "timestamp": format_time(minute - SIMULATION_START_HOUR * 60),
                                 "order_id": order_to_assign['id'],
@@ -1464,28 +1518,48 @@ def run_hybrid_simulation():
                                 "assigned_vehicle": assigned_vehicle_id,
                                 "method": method
                             })
-                        
-                        # Set the new routes
+                            if DETAILED_DEBUG:
+                                print(f"  [L1 DEBUG] Successfully logged assignment for order {order_to_assign['id']}")
+                        else:
+                            print(f"  [L1 DEBUG] Skipping historical log append for order {order_to_assign['id']} due to vehicle ID issue.")
+
+                        # IMPORTANT: Update the global current_routes with the result from L1
                         current_routes = final_routes
+                        # Remove the order from the pending list if it's still there
                         if order_to_assign in pending_orders:
-                            pending_orders.remove(order_to_assign) # Remove from pending
-                    
+                            pending_orders.remove(order_to_assign)
+
+                    # Append success event to the main simulation timeline
                     simulation_events.append({
                         'type': 'assignment',
                         'time': format_time(minute - SIMULATION_START_HOUR * 60),
                         'description': f"<span style='color:green;'>✓ ASSIGNED (L1)</span> Order #{order_to_assign['id']} via <strong>{method}</strong>. Dest: {order_location}",
                         'success': True
                     })
-                else:
-                    # If final_routes is None, assignment failed
-                    print(f"FAILURE (L1): Order #{order_to_assign['id']} could not be assigned. Awaiting Layer 2.")
+
+                else: # Assignment failed (final_routes is None)
+                    print(f"FAILURE (L1): Order #{order_to_assign['id']} could not be assigned. Awaiting Optimizer.")
+                    # Append failure event to the main simulation timeline
                     simulation_events.append({
                         'type': 'assignment',
                         'time': format_time(minute - SIMULATION_START_HOUR * 60),
                         'description': f"<span style='color:red;'>✗ FAILED (L1)</span> Could not find immediate fit for Order #{order_to_assign['id']}.",
                         'success': False
                     })
-        
+            # --- End of loop for order_to_assign ---
+
+            # --- Log L1 Status Update after processing all orders in the tick ---
+            if assigned_this_tick:
+                with state_lock:
+                    # Make sure calculate_total_fleet_cost is defined correctly and accessible
+                    l1_cost, l1_trucks, l1_dist = calculate_total_fleet_cost(
+                        current_routes, distance_matrix,
+                        FIXED_COST_PER_TRUCK, VARIABLE_COST_PER_KM
+                    )
+                print(f"\n--- [LAYER 1 STATUS UPDATE] Cost={l1_cost:.2f}, Trucks={l1_trucks}, Dist={l1_dist:.2f} km ---")
+        # --- End of if pending_orders ---
+
+        # If after L1 processing, there are no pending orders left
         if not pending_orders:
             print("All pending orders assigned.")
             
@@ -1564,4 +1638,3 @@ def run_hybrid_simulation():
     generate_html_report()
 if __name__ == "__main__":
     run_hybrid_simulation()
-
