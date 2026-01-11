@@ -1,10 +1,17 @@
 # Ignore everything
 *
 
+# !*.env
+
 # Un-ignore the desired file types
 !*.py
 !*.csv
 !*.md
+!*.bat
+!requirements.txt
+!Dockerfile
+!docker-compose.yml
+!.dockerignore
 
 # Un-ignore all directories so git can traverse them
 !*/
@@ -14,3 +21,4 @@
 
 # Ignore the Lib folder
 Lib/
+legacy_scripts/

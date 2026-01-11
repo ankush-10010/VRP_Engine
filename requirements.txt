@@ -1,0 +1,15 @@
+pandas
+googlemaps
+ortools
+fastapi
+uvicorn
+python-dotenv
+celery
+redis
+requests
+httpx
+pytest
+python-multipart
+sqlalchemy
+psycopg2-binary
+alembic
