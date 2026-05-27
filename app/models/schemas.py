@@ -54,6 +54,7 @@ class VehicleRoute(BaseModel):
 class OptimizationLogEntry(BaseModel):
     iteration: int
     timestamp: str # "HH:MM:SS"
+    l1_cost: float
     l2_cost: float
     l3_cost: float
     winner: str # "L2" or "L3"
@@ -82,6 +83,9 @@ class OptimizationResponse(BaseModel):
     events: List[SimulationEvent] = []
 
 class SimulationConfig(BaseModel):
+    # Overall Strategy
+    strategy: str = "benchmark"  # "benchmark", "alns", "ortools", "tabu"
+
     # Fleet Settings
     num_vehicles: int = 10
     vehicle_capacity: int = 20

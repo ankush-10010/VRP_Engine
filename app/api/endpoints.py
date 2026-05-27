@@ -26,46 +26,22 @@ async def geocode_locations(request: GeocodeRequest, api_key: str = Depends(get_
     locations, failed = geocoding.geocode_addresses(request.addresses, api_key)
     return GeocodeResponse(locations=locations, failed_addresses=failed)
 
-@router.post("/matrix-async")
-async def build_matrix_async(request: MatrixRequest, api_key: str = Depends(get_api_key)):
-    """
-    Trigger a background task to calculate the matrix.
-    Returns a Task ID.
-    """
-    from ..worker import calculate_matrix_task
-    
-    # Convert Pydantic models to dicts for Celery serialization
-    locations_dicts = [loc.dict() for loc in request.locations]
-    
-    task = calculate_matrix_task.delay(
-        locations_dicts, 
-        api_key, 
-        request.departure_time_offset_hours
-    )
-    
-    return {"task_id": task.id, "status": "Processing started"}
-
 @router.get("/matrix-status/{task_id}")
 async def get_matrix_status(task_id: str):
     """
-    Check the status of a background matrix task.
+    Check the status of a background matrix task on Modal.
     """
-    from ..worker import calculate_matrix_task, run_simulation_task
-    from celery.result import AsyncResult
+    import modal
     
-    # Check both task types (not ideal but works for now)
-    task_result = AsyncResult(task_id, app=calculate_matrix_task.app)
-    
-    if task_result.state == 'PENDING':
-        return {"status": "Pending"}
-    elif task_result.state == 'PROGRESS':
-        return {"status": "Progress", "meta": task_result.info}
-    elif task_result.state == 'SUCCESS':
-        return {"status": "Success", "result": task_result.result}
-    elif task_result.state == 'FAILURE':
-        return {"status": "Failure", "error": str(task_result.result)}
-    else:
-        return {"status": task_result.state}
+    try:
+        call = modal.FunctionCall.from_id(task_id)
+        # Check if the cloud server finished the math without blocking
+        result = call.get(timeout=0.1)
+        return {"status": "Completed", "result": result}
+    except TimeoutError:
+        return {"status": "Progress", "meta": {"message": "Processing in Modal cloud..."}}
+    except Exception as e:
+        return {"status": "Failure", "error": str(e)}
 
 @router.post("/simulation/upload-csv")
 async def upload_simulation_csv(
@@ -74,12 +50,10 @@ async def upload_simulation_csv(
     api_key: str = Depends(get_api_key)
 ):
     """
-    Upload a CSV file to start a full simulation pipeline.
+    Upload a CSV file to start a full simulation pipeline via Modal.
     Optionally accepts a 'settings' JSON string for configuration.
     Returns a Task ID.
     """
-    from ..worker import run_simulation_task
-    
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="File must be a CSV")
         
@@ -93,38 +67,13 @@ async def upload_simulation_csv(
         except json.JSONDecodeError:
             raise HTTPException(status_code=400, detail="Invalid JSON in settings field")
     
-    # Trigger Background Task
-    task = run_simulation_task.delay(csv_text, api_key, config_dict)
+    import sys
+    import os
+    # Ensure root directory is accessible for modal import
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+    from modal_app import modal_simulation_task
     
-    return {"task_id": task.id, "status": "Simulation started", "filename": file.filename}
-
-@router.post("/matrix", response_model=MatrixResponse)
-async def build_matrix(request: MatrixRequest, api_key: str = Depends(get_api_key)):
-    """
-    Build a time/distance matrix synchronously.
-    Retained for small testing, but /matrix-async is recommended for production.
-    """
-    # Assuming the first location is the depot or user specified logic
-    # Here we just pass all locations
-    time_mat, dist_mat = matrix.calculate_matrix(
-        request.locations, 
-        api_key, 
-        request.departure_time_offset_hours
-    )
+    # Trigger Background Task on Modal
+    call = modal_simulation_task.spawn(csv_text, api_key, config_dict)
     
-    return MatrixResponse(
-        locations=request.locations,
-        time_matrix=time_mat,
-        distance_matrix=dist_mat
-    )
-
-@router.post("/optimize", response_model=OptimizationResponse)
-async def optimize_routes(request: OptimizationRequest):
-    """
-    Run the solver.
-    """
-    # Helper to reconstruct config from request if needed, or stick to simple
-    # logic. Since solver refactor, solve_cvrp is gone.
-    # We should probably use solve_l2_ortools or something simple here.
-    # For now, let's just return 501.
-    raise HTTPException(status_code=501, detail="This endpoint is being refactored. Use /simulation/upload-csv.")
+    return {"task_id": call.object_id, "status": "Simulation started", "filename": file.filename}

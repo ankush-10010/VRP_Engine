@@ -1,5 +1,5 @@
 # Ignore everything
-*
+# *
 
 # !*.env
 
@@ -13,6 +13,9 @@
 !docker-compose.yml
 !.dockerignore
 
+!*.jpg
+!*.pdf
+
 # Un-ignore all directories so git can traverse them
 !*/
 
@@ -21,4 +24,4 @@
 
 # Ignore the Lib folder
 Lib/
-legacy_scripts/
+legacy_scripts/!*.jpg

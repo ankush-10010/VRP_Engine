@@ -117,39 +117,53 @@ def run_hybrid_simulation(orders: List[Order],
             # Use Pending orders AND currently assigned orders
             # (In reality, we'd filter committed orders. Here we re-optimize everything not completed)
             # Optimization considers entire current state
-            
-            if not pending_orders:
-                 # Skip expensive re-optimization if we have no backlog
+            has_active_orders = len(pending_orders) > 0 or any(len(route) > 0 for route in current_routes.values())
+            if not has_active_orders:
+                 # Skip expensive re-optimization if we have no active orders
                  # This speeds up the simulation significantly during idle periods
                  continue
+            from ..core_engine.solvers.factory import SolverFactory
 
-            # --- Competition ---
+            # --- Solver Execution ---
             
-            # Candidate 1: L2 (OR-Tools)
-            print(f"[SIMULATION] Calling solve_l2_ortools...")
-            l2_routes, l2_unassigned = solver.solve_l2_ortools(current_routes, pending_orders, time_matrix, config)
-            print(f"[SIMULATION] solve_l2_ortools returned.")
-            l2_cost, _, _ = solver.calculate_total_fleet_cost(l2_routes, distance_matrix, config)
-            l2_adj_cost = l2_cost + (len(l2_unassigned) * config.fixed_cost_per_truck * 10)
+            # Calculate L1 cost before optimization
+            l1_cost, _, _ = solver.calculate_total_fleet_cost(current_routes, distance_matrix, config)
+            l1_adj_cost = l1_cost + (len(pending_orders) * config.fixed_cost_per_truck * 10)
             
-            # Candidate 2: L3 (ALNS)
-            if config.alns_enabled:
-                l3_routes, l3_unassigned = solver.solve_l3_alns(current_routes, pending_orders, time_matrix, distance_matrix, config)
+            l2_cost = float('inf')
+            l3_cost = float('inf')
+            l2_routes, l2_unassigned = {}, []
+            l3_routes, l3_unassigned = {}, []
+            l2_adj_cost = float('inf')
+            l3_adj_cost = float('inf')
+
+            strategy = config.strategy.lower()
+
+            if strategy in ["ortools", "benchmark"]:
+                print(f"[SIMULATION] Calling ORToolsSolver...")
+                ortools_solver = SolverFactory.create_solver("ortools")
+                l2_routes, l2_unassigned = ortools_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config)
+                print(f"[SIMULATION] ORToolsSolver returned.")
+                l2_cost, _, _ = solver.calculate_total_fleet_cost(l2_routes, distance_matrix, config)
+                l2_adj_cost = l2_cost + (len(l2_unassigned) * config.fixed_cost_per_truck * 10)
+
+            if strategy in ["alns", "benchmark"] and config.alns_enabled:
+                print(f"[SIMULATION] Calling ALNSSolver...")
+                alns_solver = SolverFactory.create_solver("alns")
+                l3_routes, l3_unassigned = alns_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config)
+                print(f"[SIMULATION] ALNSSolver returned.")
                 l3_cost, _, _ = solver.calculate_total_fleet_cost(l3_routes, distance_matrix, config)
                 l3_adj_cost = l3_cost + (len(l3_unassigned) * config.fixed_cost_per_truck * 10)
-            else:
-                l3_cost = float('inf')
-                l3_adj_cost = float('inf')
                 
             # Compare
             winner = "None"
             improvement = 0.0
             
-            if l2_adj_cost < float('inf') and l2_adj_cost <= l3_adj_cost:
+            if strategy == "ortools" or (strategy == "benchmark" and l2_adj_cost < float('inf') and l2_adj_cost <= l3_adj_cost):
                 current_routes = l2_routes
                 pending_orders = l2_unassigned
                 winner = "L2"
-            elif l3_adj_cost < float('inf'):
+            elif strategy == "alns" or (strategy == "benchmark" and l3_adj_cost < float('inf')):
                 current_routes = l3_routes
                 pending_orders = l3_unassigned
                 winner = "L3"
@@ -166,6 +180,7 @@ def run_hybrid_simulation(orders: List[Order],
                 optimization_log.append(OptimizationLogEntry(
                     iteration=len(optimization_log) + 1,
                     timestamp=formatted_curr_time,
+                    l1_cost=l1_adj_cost if l1_adj_cost != float('inf') else 0.0,
                     l2_cost=l2_cost if l2_cost != float('inf') else 0.0,
                     l3_cost=l3_cost if l3_cost != float('inf') else 0.0,
                     winner=winner,

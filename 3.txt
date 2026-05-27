@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VRP Engine - Results Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed": "#311400",
+                        "on-tertiary-container": "#461f00",
+                        "on-tertiary": "#502400",
+                        "surface-container-highest": "#2d3449",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "inverse-primary": "#005ac2",
+                        "error": "#ffb4ab",
+                        "surface-container": "#171f33",
+                        "outline-variant": "#424754",
+                        "background": "#0b1326",
+                        "surface-tint": "#adc6ff",
+                        "secondary-container": "#571bc1",
+                        "surface-container-low": "#131b2e",
+                        "outline": "#8c909f",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary": "#ffb786",
+                        "inverse-on-surface": "#283044",
+                        "on-primary-container": "#00285d",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary-fixed-variant": "#004395",
+                        "tertiary-fixed": "#ffdcc6",
+                        "surface-variant": "#2d3449",
+                        "on-error": "#690005",
+                        "surface-container-lowest": "#060e20",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "secondary": "#d0bcff",
+                        "on-background": "#dae2fd",
+                        "primary": "#adc6ff",
+                        "on-secondary-fixed": "#23005c",
+                        "on-surface": "#dae2fd",
+                        "on-secondary": "#3c0091",
+                        "on-primary": "#002e6a",
+                        "surface": "#0b1326",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#df7412",
+                        "surface-bright": "#31394d",
+                        "primary-fixed": "#d8e2ff",
+                        "primary-container": "#4d8eff",
+                        "secondary-fixed": "#e9ddff",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-secondary-container": "#c4abff",
+                        "surface-dim": "#0b1326",
+                        "surface-container-high": "#222a3d"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    fontFamily: {
+                        "headline-xl": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "data-display": ["JetBrains Mono"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline-xl": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "data-display": ["18px", { "lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background-color: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-gradient {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(to right, #4d8eff, #d0bcff);
+        }
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-surface/70 backdrop-blur-xl flex justify-between items-center px-margin-desktop h-20 w-full fixed top-0 z-50 border-b border-white/10 shadow-2xl">
+<div class="flex items-center gap-8">
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary tracking-tighter hidden md:block">VRP Engine</h1>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary tracking-tighter md:hidden">VRP Engine</h1>
+<div class="hidden md:flex gap-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors hover:bg-surface-bright/50 duration-300 px-3 py-2 rounded" href="#">Dashboard</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors hover:bg-surface-bright/50 duration-300 px-3 py-2 rounded" href="#">History</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors hover:bg-surface-bright/50 duration-300 px-3 py-2 rounded" href="#">API Docs</a>
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary pb-1 px-3 py-2" href="#">Results</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="hidden md:flex bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-90 transition-opacity items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Simulation
+            </button>
+<button class="md:hidden bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container p-2 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+<div class="flex gap-4">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">settings</span></button>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined">account_circle</span></button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-[104px] pb-12 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto space-y-gutter">
+<!-- Header -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-2">Simulation Results</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Run ID: VRP-774A-9X • Completed: Just now</p>
+</div>
+<div class="flex gap-3">
+<button class="glass-panel px-4 py-2 rounded-lg font-label-caps text-label-caps text-on-surface hover:bg-surface-bright transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">download</span> Export JSON
+                </button>
+</div>
+</header>
+<!-- KPI Ribbon (Top) -->
+<section class="grid grid-cols-2 md:grid-cols-5 gap-unit md:gap-gutter">
+<!-- Card 1 -->
+<div class="glass-panel p-6 rounded-xl flex flex-col justify-between h-full">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">Total Orders Processed</p>
+<div class="flex items-end justify-between">
+<p class="font-data-display text-data-display text-3xl font-bold text-on-surface">450</p>
+<span class="material-symbols-outlined text-primary opacity-50 text-3xl">list_alt</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel p-6 rounded-xl flex flex-col justify-between h-full border-t-2 border-t-[#34d399]">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">Success Rate</p>
+<div class="flex items-end justify-between">
+<p class="font-data-display text-data-display text-3xl font-bold text-[#34d399]">98.2%</p>
+<span class="material-symbols-outlined text-[#34d399] opacity-50 text-3xl">check_circle</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel p-6 rounded-xl flex flex-col justify-between h-full">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">Fleet Utilization</p>
+<div>
+<div class="flex items-end justify-between mb-2">
+<p class="font-data-display text-data-display text-3xl font-bold text-on-surface">87%</p>
+<span class="material-symbols-outlined text-primary opacity-50 text-3xl">local_shipping</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 87%"></div>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="glass-panel p-6 rounded-xl flex flex-col justify-between h-full">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">Total Fleet Cost</p>
+<div class="flex items-end justify-between">
+<p class="font-data-display text-data-display text-3xl font-bold text-on-surface">$14,250</p>
+<span class="material-symbols-outlined text-primary opacity-50 text-3xl">payments</span>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="glass-panel p-6 rounded-xl flex flex-col justify-between h-full border-t-2 border-t-error">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-4">Unassigned Orders</p>
+<div class="flex items-end justify-between">
+<p class="font-data-display text-data-display text-3xl font-bold text-error">8</p>
+<span class="material-symbols-outlined text-error opacity-50 text-3xl">warning</span>
+</div>
+</div>
+</section>
+<!-- Middle Row (60/40 Split) -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter min-h-[400px]">
+<!-- Left (60%): Interactive Route Map -->
+<div class="lg:col-span-7 glass-panel rounded-xl overflow-hidden flex flex-col relative border border-white/5 shadow-lg bg-[#0f172a]">
+<div class="p-6 border-b border-white/10 flex justify-between items-center bg-surface-container-low/50 z-10">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Interactive Route Map</h3>
+<div class="flex gap-2">
+<button class="bg-primary/20 text-primary border border-primary/50 px-3 py-1 rounded-full font-label-caps text-label-caps text-[10px] hover:bg-primary/30 transition-colors">Vehicle 1</button>
+<button class="bg-surface-container-highest text-on-surface-variant border border-white/10 px-3 py-1 rounded-full font-label-caps text-label-caps text-[10px] hover:bg-surface-bright transition-colors">Vehicle 2</button>
+<button class="bg-surface-container-highest text-on-surface-variant border border-white/10 px-3 py-1 rounded-full font-label-caps text-label-caps text-[10px] hover:bg-surface-bright transition-colors">Vehicle 3</button>
+</div>
+</div>
+<div class="flex-grow bg-grid-pattern relative flex items-center justify-center bg-[#080c17]">
+<!-- Mock Map Content -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 pointer-events-none"></div>
+<span class="material-symbols-outlined text-primary text-[120px] opacity-20">map</span>
+<!-- Mock Route Lines -->
+<svg class="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+<path class="opacity-70" d="M 100 100 Q 200 50 300 150 T 500 200" fill="none" stroke="#4d8eff" stroke-dasharray="8 4" stroke-width="3"></path>
+<circle cx="100" cy="100" fill="#4d8eff" r="6"></circle>
+<circle cx="300" cy="150" fill="#4d8eff" r="6"></circle>
+<circle cx="500" cy="200" fill="#d0bcff" r="8" stroke="#0b1326" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+<!-- Right (40%): Algorithm Convergence -->
+<div class="lg:col-span-5 glass-panel rounded-xl p-6 flex flex-col relative border border-white/5 shadow-lg bg-[#0f172a]">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Algorithm Convergence</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">ALNS vs OR-Tools Performance Cost Reduction</p>
+<div class="flex-grow flex items-end relative mt-4 h-full border-l border-b border-outline-variant/30 pb-2 pl-2">
+<!-- Y Axis Labels -->
+<div class="absolute left-[-30px] top-0 bottom-0 flex flex-col justify-between text-[10px] text-on-surface-variant font-data-display h-full pb-2">
+<span>15k</span>
+<span>14k</span>
+<span>13k</span>
+<span>12k</span>
+</div>
+<!-- Mock Chart Lines (CSS representation) -->
+<div class="w-full h-full relative">
+<!-- OR-Tools Line (Electric Blue) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path class="opacity-80" d="M 0 10 L 20 40 L 40 60 L 60 70 L 80 75 L 100 78" fill="none" stroke="#4d8eff" stroke-width="2"></path>
+<!-- Data Points -->
+<circle cx="60" cy="70" fill="#4d8eff" r="2"></circle>
+<circle cx="100" cy="78" fill="#4d8eff" r="2"></circle>
+</svg>
+<!-- ALNS Line (Vibrant Purple) -->
+<svg class="absolute inset-0 w-full h-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path class="opacity-90" d="M 0 10 L 20 50 L 40 80 L 60 88 L 80 92 L 100 95" fill="none" stroke="#d0bcff" stroke-width="2"></path>
+<!-- Data Points -->
+<circle cx="40" cy="80" fill="#d0bcff" r="2"></circle>
+<circle cx="100" cy="95" fill="#d0bcff" r="2"></circle>
+</svg>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex gap-4 mt-6 justify-center">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[10px]">OR-Tools</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-secondary"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant text-[10px]">ALNS</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Row (50/50 Split) -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+<!-- Left: Fleet Manifest -->
+<div class="glass-panel rounded-xl p-6 flex flex-col border border-white/5 shadow-lg bg-[#0f172a]">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-6">Fleet Manifest</h3>
+<div class="space-y-4">
+<!-- Truck 1 Card -->
+<div class="bg-surface-container-low border border-white/5 rounded-lg p-4 hover:bg-surface-bright/30 transition-colors cursor-pointer group">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded-md">
+<span class="material-symbols-outlined text-primary text-[20px]">local_shipping</span>
+</div>
+<h4 class="font-data-display text-data-display text-on-surface font-bold text-base">Truck 1</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">expand_more</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center">
+<div class="bg-background rounded px-2 py-3">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Stops</p>
+<p class="font-data-display text-data-display text-on-surface text-sm">15</p>
+</div>
+<div class="bg-background rounded px-2 py-3">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Capacity</p>
+<p class="font-data-display text-data-display text-on-surface text-sm">85% Full</p>
+</div>
+<div class="bg-background rounded px-2 py-3">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Duration</p>
+<p class="font-data-display text-data-display text-on-surface text-sm">142 mins</p>
+</div>
+</div>
+</div>
+<!-- Truck 2 Card -->
+<div class="bg-surface-container-low border border-white/5 rounded-lg p-4 hover:bg-surface-bright/30 transition-colors cursor-pointer group">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center gap-3">
+<div class="bg-surface-container-highest p-2 rounded-md">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">local_shipping</span>
+</div>
+<h4 class="font-data-display text-data-display text-on-surface font-bold text-base">Truck 2</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">expand_more</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center opacity-70">
+<div class="bg-background rounded px-2 py-3">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Stops</p>
+<p class="font-data-display text-data-display text-on-surface text-sm">12</p>
+</div>
+<div class="bg-background rounded px-2 py-3">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Capacity</p>
+<p class="font-data-display text-data-display text-on-surface text-sm">60% Full</p>
+</div>
+<div class="bg-background rounded px-2 py-3">
+<p class="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Duration</p>
+<p class="font-data-display text-data-display text-on-surface text-sm">110 mins</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Simulation Event Log -->
+<div class="glass-panel rounded-xl p-6 flex flex-col border border-white/5 shadow-lg bg-[#0f172a]">
+<h3 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-6">Simulation Event Log</h3>
+<div class="relative pl-6 border-l-2 border-surface-container-highest space-y-8 flex-grow">
+<!-- Event 1 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-surface-container-highest border-2 border-background flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></div>
+</div>
+<p class="font-data-display text-data-display text-[12px] text-on-surface-variant mb-1">[09:00 AM]</p>
+<p class="font-body-sm text-body-sm text-on-surface">Simulation Started</p>
+</div>
+<!-- Event 2 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-surface-container-highest border-2 border-background flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+</div>
+<p class="font-data-display text-data-display text-[12px] text-primary mb-1">[09:14 AM]</p>
+<p class="font-body-sm text-body-sm text-on-surface">Layer 1 (Greedy) assigned Order #45</p>
+</div>
+<!-- Event 3 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-secondary-container border-2 border-background flex items-center justify-center shadow-[0_0_10px_rgba(208,188,255,0.5)]">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+</div>
+<p class="font-data-display text-data-display text-[12px] text-secondary mb-1">[09:30 AM]</p>
+<p class="font-body-sm text-body-sm text-on-surface">Layer 2 (OR-Tools) re-optimized fleet saving <span class="text-[#34d399] font-bold">12% cost</span>.</p>
+</div>
+<!-- Event 4 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-1 w-4 h-4 rounded-full bg-surface-container-highest border-2 border-background flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+</div>
+<p class="font-data-display text-data-display text-[12px] text-on-surface-variant mb-1">[09:45 AM]</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic">Awaiting further convergence...</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

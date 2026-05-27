@@ -59,6 +59,11 @@ def parse_csv_content(file_content: str) -> List[Order]:
     # Check simple validity
     if RESTAURANT_COL not in df.columns:
         raise ValueError("CSV is missing required columns. Please check the format.")
+        
+    FORCE_SINGLE_DAY = True
+    BASE_YEAR = 2024
+    BASE_MONTH = 9
+    BASE_DAY = 12
 
     for index, row in df.iterrows():
         try:
@@ -69,6 +74,12 @@ def parse_csv_content(file_content: str) -> List[Order]:
             timestamp, day, minute = parse_order_time(row[TIME_COL])
             if timestamp is None:
                 continue # Skip bad times
+                
+            if FORCE_SINGLE_DAY:
+                dt_obj = datetime.fromtimestamp(timestamp)
+                # Compress everything to the exact same day to create high data density
+                dt_obj = dt_obj.replace(year=BASE_YEAR, month=BASE_MONTH, day=BASE_DAY)
+                timestamp = dt_obj.timestamp()
             
             # Parse demand
             demand = parse_demand(row[ITEM_COL])
@@ -86,7 +97,18 @@ def parse_csv_content(file_content: str) -> List[Order]:
         except Exception:
             continue
             
-    return orders
+    # Sort orders chronologically
+    orders.sort(key=lambda x: x.timestamp)
+    
+    # --- HARDCODED PREPROCESSING LIMITS ---
+    
+    # To process ALL data, UNCOMMENT this line:
+    # final_orders = orders
+    
+    # To process limited data, COMMENT the line above and UNCOMMENT the line below:
+    final_orders = orders[:100]
+    
+    return final_orders
 
 def extract_unique_addresses(orders: List[Order]) -> List[str]:
     """Helper to get unique address strings from a list of orders"""
