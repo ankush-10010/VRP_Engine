@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { uploadSimulationCsv, getMatrixStatus } from '../api/api';
-import type { SimulationResult } from '../api/api';
+import React from 'react';
 
 interface LoadingScreenProps {
   statusText: string;

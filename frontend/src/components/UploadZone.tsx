@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { uploadSimulationCsv } from '../api/api';
-import type { TaskResponse } from '../api/api';
-
 interface Props {
     onUploadStart: () => void;
     onUploadSuccess: (taskId: string) => void;

@@ -98,7 +98,7 @@ const ResultsMap: React.FC<Props> = ({ routes }) => {
     }, [routes]);
 
     const renderRoutes = () => {
-        return routes.map((route, index) => {
+        return routes.map((route) => {
             const path = route.steps
                 .filter(s => s.lat && s.lng) // Filter out missing coords
                 .map(step => ({ lat: step.lat!, lng: step.lng! }));
