@@ -24,12 +24,7 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
   const [matrixFile, setMatrixFile] = useState<File | null>(null);
   const [useDefaultCsv, setUseDefaultCsv] = useState(false);
 
-  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
+
 
   const handleStartSimulation = async () => {
     try {

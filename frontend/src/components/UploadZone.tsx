@@ -43,7 +43,7 @@ const UploadZone: React.FC<Props> = ({ onUploadStart, onUploadSuccess, onUploadE
         onUploadStart();
 
         try {
-            const result = await uploadSimulationCsv(file, settings);
+            const result = await uploadSimulationCsv(file, false, settings);
             onUploadSuccess(result.task_id);
         } catch (error: any) {
             console.error("Upload failed", error);
