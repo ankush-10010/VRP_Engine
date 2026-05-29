@@ -14,10 +14,12 @@ image = (
         "fastapi", "uvicorn", "pydantic", "googlemaps", "pandas", "sqlalchemy", "ortools", "psycopg2-binary", "python-dotenv", "python-multipart"
     )
     .add_local_dir("app", remote_path="/root/app")
+    .add_local_file("matrix_data_with_distance.json", remote_path="/root/matrix_data_with_distance.json")
+    .add_local_file("order_history_kaggle_data.csv", remote_path="/root/order_history_kaggle_data.csv")
 )
 
 @app.function(timeout=3600, image=image, secrets=[modal.Secret.from_name("custom-secret")])
-def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = None):
+def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = None, matrix_mode: str = "scratch", custom_matrix_data: dict = None):
     """
     Full pipeline: Parse CSV -> Geocode -> Matrix -> Hybrid Simulation on Modal.
     """
@@ -27,6 +29,13 @@ def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = N
     from app.models.schemas import Location, SimulationConfig
     
     print("[MODAL WORKER] Starting Parsing CSV...")
+    if file_content == "DEFAULT_CSV":
+        try:
+            with open("/root/order_history_kaggle_data.csv", "r", encoding="utf-8") as f:
+                file_content = f.read()
+        except Exception as e:
+            return {"status": "Failed", "error": f"Failed to load default CSV: {str(e)}"}
+            
     # 1. Parse CSV
     try:
         orders = parsing.parse_csv_content(file_content)
@@ -36,41 +45,95 @@ def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = N
     if not orders:
         return {"status": "Failed", "error": "No valid orders found in CSV."}
 
-    print(f"[MODAL WORKER] Geocoding {len(orders)} orders...")
-    # 2. Extract Unique Addresses and Geocode
+    print(f"[MODAL WORKER] Processing Matrix Mode: {matrix_mode}")
     unique_address_strings = parsing.extract_unique_addresses(orders)
-    geocoded_locations, failed = geocoding.geocode_addresses(unique_address_strings, api_key)
     
-    print(f"[MODAL WORKER] Geocoding Complete. {len(geocoded_locations)} unique locations found.")
-    loc_map = {loc.original_address: loc for loc in geocoded_locations}
-    
-    # 3. Update Orders and Filter
-    valid_orders = []
-    for order in orders:
-        if order.location.original_address in loc_map:
-            order.location = loc_map[order.location.original_address]
-            valid_orders.append(order)
+    if matrix_mode == 'scratch':
+        print(f"[MODAL WORKER] Geocoding {len(orders)} orders...")
+        # 2. Extract Unique Addresses and Geocode
+        geocoded_locations, failed = geocoding.geocode_addresses(unique_address_strings, api_key)
+        
+        print(f"[MODAL WORKER] Geocoding Complete. {len(geocoded_locations)} unique locations found.")
+        loc_map = {loc.original_address: loc for loc in geocoded_locations}
+        
+        # 3. Update Orders and Filter
+        valid_orders = []
+        for order in orders:
+            if order.location.original_address in loc_map:
+                order.location = loc_map[order.location.original_address]
+                valid_orders.append(order)
+                
+        if not valid_orders:
+            return {"status": "Failed", "error": "Geocoding failed for all addresses."}
             
-    if not valid_orders:
-        return {"status": "Failed", "error": "Geocoding failed for all addresses."}
-
-    print(f"[MODAL WORKER] Starting Matrix Calculation for {len(valid_orders)} orders (plus Depot)...")
-    # 4. Build Matrix with DEPOT
-    depot = Location(
-        original_address="Central Depot (Hardcoded)",
-        latitude=28.5707,
-        longitude=77.3262,
-        formatted_address="Central Depot, Delhi"
-    )
+        orders = valid_orders
     
-    customer_locations = list(loc_map.values())
-    matrix_locations = [depot] + customer_locations
-    
-    time_mat, dist_mat = matrix.calculate_matrix(matrix_locations, api_key)
-    print(f"[MODAL WORKER] Matrix Calculation Complete.")
+        print(f"[MODAL WORKER] Starting Matrix Calculation for {len(valid_orders)} orders (plus Depot)...")
+        # 4. Build Matrix with DEPOT
+        depot = Location(
+            original_address="My New Central Kitchen",
+            latitude=28.5707,
+            longitude=77.3262,
+            formatted_address="Central Depot, Delhi"
+        )
+        
+        customer_locations = list(loc_map.values())
+        matrix_locations = [depot] + customer_locations
+        
+        time_mat, dist_mat = matrix.calculate_matrix(matrix_locations, api_key)
+        unique_loc_index = {loc.original_address: i for i, loc in enumerate(matrix_locations)}
+        print(f"[MODAL WORKER] Matrix Calculation Complete.")
+        
+    else:
+        print(f"[MODAL WORKER] Using Pre-Calculated Matrix Data (Mode: {matrix_mode})")
+        if matrix_mode == 'database':
+            try:
+                with open("/root/matrix_data_with_distance.json", "r") as f:
+                    master_matrix_data = json.load(f)
+            except Exception as e:
+                return {"status": "Failed", "error": f"Could not load database matrix: {e}"}
+        elif matrix_mode == 'upload':
+            if not custom_matrix_data:
+                return {"status": "Failed", "error": "Custom matrix mode selected but no data provided."}
+            master_matrix_data = custom_matrix_data
+        else:
+            return {"status": "Failed", "error": "Invalid matrix mode."}
+            
+        master_locations = master_matrix_data.get("locations", [])
+        time_mat = master_matrix_data.get("time_matrix", [])
+        dist_mat = master_matrix_data.get("distance_matrix", [])
+        
+        if not dist_mat:
+            dist_mat = time_mat # Fallback
+            
+        unique_loc_index = {loc['original_address']: i for i, loc in enumerate(master_locations)}
+        
+        # Filter valid orders
+        valid_orders = []
+        customer_locations = []
+        added_custs = set()
+        
+        for order in orders:
+            addr = order.location.original_address
+            if addr in unique_loc_index:
+                loc_data = master_locations[unique_loc_index[addr]]
+                # Filter out any NaN coordinates if needed
+                lat = loc_data.get('latitude')
+                if lat is None or (isinstance(lat, float) and lat != lat): # check for NaN
+                     continue
+                     
+                order.location = Location(**loc_data)
+                valid_orders.append(order)
+                if addr not in added_custs:
+                    customer_locations.append(order.location)
+                    added_custs.add(addr)
+                    
+        if not valid_orders:
+            return {"status": "Failed", "error": "None of the uploaded orders match locations in the provided matrix or missing coordinates."}
+            
+        orders = valid_orders
 
     # 5. Solve: Expand Matrix and Call Solver
-    unique_loc_index = {loc.original_address: i for i, loc in enumerate(matrix_locations)}
     
     num_solver_nodes = len(orders) + 1
     solver_matrix = [[0.0] * num_solver_nodes for _ in range(num_solver_nodes)]

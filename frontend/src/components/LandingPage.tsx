@@ -20,6 +20,9 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
   
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [matrixMode, setMatrixMode] = useState('scratch');
+  const [matrixFile, setMatrixFile] = useState<File | null>(null);
+  const [useDefaultCsv, setUseDefaultCsv] = useState(false);
 
   const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -44,7 +47,7 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
         variable_cost_per_km: variableCost,
         alns_enabled: strategy === 'benchmark' || strategy === 'alns',
       };
-      const response = await uploadSimulationCsv(file, settings);
+      const response = await uploadSimulationCsv(file, useDefaultCsv, settings, matrixMode, matrixFile);
       onUploadStart(response.task_id);
     } catch (error) {
       console.error("Failed to start simulation", error);
@@ -251,38 +254,123 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
             <div className="flex flex-col gap-8">
               <div className="flex justify-between items-end mb-2">
                 <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface flex items-center gap-3">
-                  <span className="material-symbols-outlined text-secondary">cloud_upload</span>
-                  Data Source
+                  <span className="material-symbols-outlined text-secondary">settings_input_component</span> Simulation Setup
                 </h2>
               </div>
 
-              {/* Upload Area */}
-              <div 
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleFileDrop}
-                className="border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center p-12 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:border-primary transition-all group cursor-pointer h-64 relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>   
-                <span className="material-symbols-outlined text-5xl text-outline-variant group-hover:text-primary mb-4 transition-colors">cloud_sync</span>
-                <p className="font-body-md text-body-md text-on-surface mb-1">
-                  {file ? file.name : "Drag & Drop Order CSV"}
-                </p>
-                <p className="font-body-sm text-body-sm text-on-surface-variant text-center max-w-xs">Supported formats: .csv, .xlsx. Maximum file size: 50MB.</p>
-                <div className="mt-6">
-                  <label className="px-4 py-2 bg-surface-container border border-outline-variant rounded font-label-caps text-label-caps text-on-surface group-hover:border-primary group-hover:text-primary transition-colors cursor-pointer">
-                    Browse Files
-                    <input 
-                      type="file" 
-                      accept=".csv" 
-                      className="hidden" 
-                      onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-                    />
+              {/* Routing Engine Mode Selector */}
+              <div className="flex flex-col gap-4 mt-2">
+                <label className="font-label-caps text-label-caps text-on-surface-variant">ROUTING ENGINE MODE</label>
+                <div className="flex flex-col gap-3">
+                  <label className={`relative flex items-center p-4 rounded-xl border ${matrixMode === 'scratch' ? 'border-primary' : 'border-outline-variant'} bg-surface-container-low hover:border-primary transition-all cursor-pointer group`}>
+                    <input type="radio" name="routing_mode" value="scratch" className="sr-only peer" checked={matrixMode === 'scratch'} onChange={() => setMatrixMode('scratch')} />
+                    <div className={`w-5 h-5 rounded-full border-2 ${matrixMode === 'scratch' ? 'border-primary' : 'border-outline-variant'} flex items-center justify-center mr-4 transition-colors`}>
+                      <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-opacity ${matrixMode === 'scratch' ? 'opacity-100' : 'opacity-0'}`}></div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-body-md text-on-surface group-hover:text-primary transition-colors">Calculate from Scratch</span>
+                      <span className="font-data-display text-[12px] text-on-surface-variant">Slower. Geocodes all locations and queries live traffic data.</span>
+                    </div>
+                  </label>
+                  <label className={`relative flex items-center p-4 rounded-xl border ${matrixMode === 'database' ? 'border-primary' : 'border-outline-variant'} bg-surface-container-low hover:border-primary transition-all cursor-pointer group`}>
+                    <input type="radio" name="routing_mode" value="database" className="sr-only peer" checked={matrixMode === 'database'} onChange={() => setMatrixMode('database')} />
+                    <div className={`w-5 h-5 rounded-full border-2 ${matrixMode === 'database' ? 'border-primary' : 'border-outline-variant'} flex items-center justify-center mr-4 transition-colors`}>
+                      <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-opacity ${matrixMode === 'database' ? 'opacity-100' : 'opacity-0'}`}></div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-body-md text-on-surface group-hover:text-primary transition-colors">Use Master Database Matrix</span>
+                      <span className="font-data-display text-[12px] text-on-surface-variant">Fastest. Uses pre-computed travel times for known locations.</span>
+                    </div>
+                  </label>
+                  <label className={`relative flex items-center p-4 rounded-xl border ${matrixMode === 'upload' ? 'border-primary' : 'border-outline-variant'} bg-surface-container-low hover:border-primary transition-all cursor-pointer group`}>
+                    <input type="radio" name="routing_mode" value="upload" className="sr-only peer" checked={matrixMode === 'upload'} onChange={() => setMatrixMode('upload')} />
+                    <div className={`w-5 h-5 rounded-full border-2 ${matrixMode === 'upload' ? 'border-primary' : 'border-outline-variant'} flex items-center justify-center mr-4 transition-colors`}>
+                      <div className={`w-2.5 h-2.5 rounded-full bg-primary transition-opacity ${matrixMode === 'upload' ? 'opacity-100' : 'opacity-0'}`}></div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-body-md text-on-surface group-hover:text-primary transition-colors">Upload Custom Matrix</span>
+                      <span className="font-data-display text-[12px] text-on-surface-variant">Provide your own JSON matrix.</span>
+                    </div>
                   </label>
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
-                <a className="text-primary hover:text-primary-fixed flex items-center gap-1 font-body-sm text-body-sm transition-colors" href="#">
+              {/* Dynamic Upload Dialog Area */}
+              <div className="bg-surface-container-high/50 backdrop-blur-md rounded-xl p-6 border border-outline-variant flex flex-col gap-4">
+                
+                {matrixMode === 'scratch' && (
+                  <div className="flex flex-col gap-2">
+                    <label className="font-label-caps text-label-caps text-on-surface-variant">ORDERS DATA</label>
+                    <div className="relative border border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center p-4 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:border-primary transition-all group cursor-pointer overflow-hidden">
+                      <input type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+                      <span className="material-symbols-outlined text-outline-variant group-hover:text-primary mb-1 transition-colors">upload_file</span>
+                      <p className="font-body-sm text-body-sm text-on-surface mb-1">{file ? file.name : "Upload Orders CSV"}</p>
+                      <p className="font-label-caps text-[10px] text-on-surface-variant">Max 50MB &bull; .csv</p>
+                    </div>
+                  </div>
+                )}
+
+                {matrixMode === 'database' && (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant">ORDERS DATA</label>
+                      <div className="relative border border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center p-4 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:border-primary transition-all group cursor-pointer overflow-hidden">
+                        <input type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+                        <span className="material-symbols-outlined text-outline-variant group-hover:text-primary mb-1 transition-colors">upload_file</span>
+                        <p className="font-body-sm text-body-sm text-on-surface mb-1">{file ? file.name : "Upload Orders CSV"}</p>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant">Max 50MB &bull; .csv</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2 p-3 rounded bg-surface-container-highest border border-outline-variant/50">
+                      <span className="material-symbols-outlined text-secondary text-sm mt-0.5">info</span>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant">Distance matrix will be taken from the database.</p>
+                    </div>
+                  </div>
+                )}
+
+                {matrixMode === 'upload' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant">ORDERS DATA</label>
+                      <div className="relative border border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center p-4 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:border-primary transition-all group cursor-pointer h-full overflow-hidden">
+                        <input type="file" accept=".csv" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)} />
+                        <span className="material-symbols-outlined text-outline-variant group-hover:text-primary mb-1 transition-colors">upload_file</span>
+                        <p className="font-body-sm text-body-sm text-on-surface mb-1 text-center">{file ? file.name : "Orders CSV"}</p>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant">Max 50MB</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="font-label-caps text-label-caps text-on-surface-variant">DISTANCE MATRIX</label>
+                      <div className="relative border border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center p-4 bg-surface-container-lowest/50 hover:bg-surface-container-lowest hover:border-secondary transition-all group cursor-pointer h-full overflow-hidden">
+                        <input type="file" accept=".json" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setMatrixFile(e.target.files ? e.target.files[0] : null)} />
+                        <span className="material-symbols-outlined text-outline-variant group-hover:text-secondary mb-1 transition-colors">upload_file</span>
+                        <p className="font-body-sm text-body-sm text-on-surface mb-1 text-center">{matrixFile ? matrixFile.name : "Matrix JSON"}</p>
+                        <p className="font-label-caps text-[10px] text-on-surface-variant">Max 100MB</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center mt-2">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <div className="relative flex items-center">
+                    <input 
+                      type="checkbox" 
+                      className="peer sr-only" 
+                      checked={useDefaultCsv} 
+                      onChange={(e) => {
+                        setUseDefaultCsv(e.target.checked);
+                        if (e.target.checked) setFile(null);
+                      }} 
+                    />
+                    <div className="w-5 h-5 border-2 border-outline-variant rounded peer-checked:bg-primary peer-checked:border-primary flex items-center justify-center transition-colors">
+                      <span className="material-symbols-outlined text-[14px] text-white opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+                    </div>
+                  </div>
+                  <span className="font-body-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Use Default Database CSV (Skip Upload)</span>
+                </label>
+                <a href="#" className="text-primary hover:text-primary-fixed flex items-center gap-1 font-body-sm text-body-sm transition-colors">
                   <span className="material-symbols-outlined text-sm">download</span>
                   Download Template CSV
                 </a>
@@ -291,13 +379,14 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
               {/* Primary Action Button */}
               <button 
                 onClick={handleStartSimulation}
-                className="w-full mt-auto relative group overflow-hidden rounded-xl p-[1px] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                disabled={(!file && !useDefaultCsv) || (matrixMode === 'upload' && !matrixFile)}
+                className={`w-full mt-auto relative group overflow-hidden rounded-xl p-[1px] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background ${((!file && !useDefaultCsv) || (matrixMode === 'upload' && !matrixFile)) ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-[gradient_2s_linear_infinite] opacity-70 group-hover:opacity-100 transition-opacity"></span>
+                <span className={`absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-[gradient_2s_linear_infinite] opacity-70 transition-opacity ${((!file && !useDefaultCsv) || (matrixMode === 'upload' && !matrixFile)) ? '' : 'group-hover:opacity-100'}`}></span>
                 <div className="relative bg-gradient-to-b from-[#1E293B] to-[#0F172A] px-8 py-5 rounded-[11px] flex items-center justify-center gap-3 transition-transform group-active:scale-[0.98]">
                   <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/20 rounded-t-[11px]"></div>
                   <span className="font-label-caps text-label-caps text-white tracking-widest text-lg">
-                    {file ? 'Run Custom Simulation' : 'Run Demo Simulation'}
+                    {useDefaultCsv ? 'Run Simulation (Default Data)' : file ? 'Run Simulation' : 'Upload Data to Start'}
                   </span>
                   <span className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                 </div>

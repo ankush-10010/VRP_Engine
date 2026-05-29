@@ -74,19 +74,23 @@ export interface TaskResponse {
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ankushraj10010--vrp-optimizer-fastapi-modal-wrapper.modal.run/api/v1';
 
-export const uploadSimulationCsv = async (file: File | null, settings: Record<string, any> | null): Promise<TaskResponse> => {
+export const uploadSimulationCsv = async (file: File | null, useDefaultCsv: boolean, settings: Record<string, any> | null, matrixMode: string = 'scratch', matrixFile: File | null = null): Promise<TaskResponse> => {
     const formData = new FormData();
-    if (file) {
+    if (useDefaultCsv) {
+        formData.append('use_default_csv', 'true');
+    } else if (file) {
         formData.append('file', file);
     } else {
-        // Create a dummy file for demo purposes if none provided
-        const blob = new Blob(["dummy,csv\ndata,1"], { type: 'text/csv' });
-        const dummyFile = new File([blob], "demo_data.csv", { type: "text/csv" });
-        formData.append('file', dummyFile);
+        throw new Error("No file provided and useDefaultCsv is false");
     }
     
     if (settings) {
         formData.append('settings', JSON.stringify(settings));
+    }
+    
+    formData.append('matrix_mode', matrixMode);
+    if (matrixFile) {
+        formData.append('matrix_file', matrixFile);
     }
 
     // Retry logic for Modal Cold Starts (up to 3 retries, 2s delay)

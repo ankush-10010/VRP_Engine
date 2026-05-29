@@ -1,9 +1,7 @@
-# Ignore everything
-# *
+# Ignore everything by default
+*
 
-# !*.env
-
-# Un-ignore the desired file types
+# --- EXCLUSIONS (Files to Keep) ---
 !*.py
 !*.csv
 !*.md
@@ -12,9 +10,8 @@
 !Dockerfile
 !docker-compose.yml
 !.dockerignore
-
-!*.jpg
 !*.pdf
+# Removed !*.jpg from here to ignore resume.jpg
 
 # Un-ignore all directories so git can traverse them
 !*/
@@ -22,6 +19,14 @@
 # Don't ignore the .gitignore file itself
 !.gitignore
 
-# Ignore the Lib folder
+# --- SPECIFIC IGNORES ---
 Lib/
-legacy_scripts/!*.jpg
+legacy_scripts/
+__pycache__/
+*.pyc
+
+# Added specifically as requested:
+.env
+frontend/.env
+matrix_data_with_distance.json
+resume.jpg

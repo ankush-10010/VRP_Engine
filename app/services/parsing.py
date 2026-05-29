@@ -77,9 +77,9 @@ def parse_csv_content(file_content: str) -> List[Order]:
                 
             if FORCE_SINGLE_DAY:
                 dt_obj = datetime.fromtimestamp(timestamp)
-                # Compress everything to the exact same day to create high data density
-                dt_obj = dt_obj.replace(year=BASE_YEAR, month=BASE_MONTH, day=BASE_DAY)
-                timestamp = dt_obj.timestamp()
+                # Filter to only include orders that actually happened on this specific day
+                if dt_obj.year != BASE_YEAR or dt_obj.month != BASE_MONTH or dt_obj.day != BASE_DAY:
+                    continue
             
             # Parse demand
             demand = parse_demand(row[ITEM_COL])
@@ -106,7 +106,7 @@ def parse_csv_content(file_content: str) -> List[Order]:
     # final_orders = orders
     
     # To process limited data, COMMENT the line above and UNCOMMENT the line below:
-    final_orders = orders[:100]
+    final_orders = orders[:500]
     
     return final_orders
 
