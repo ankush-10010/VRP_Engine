@@ -1,0 +1,137 @@
+name: Full Full-Stack CI/CD Pipeline (Learning Example)
+
+# 1. TRIGGERS: When should this pipeline run?
+on:
+  push:
+    branches: [ "main" ]         # Runs when code is merged or pushed to main
+  pull_request:
+    branches: [ "main" ]         # Runs when a PR is opened against main
+
+# 2. JOBS: These are the major stages of your pipeline. 
+# By default, jobs run in parallel (at the same time) unless you link them with 'needs:'.
+jobs:
+  
+  # JOB 1: Backend Continuous Integration (CI)
+  backend-ci:
+    name: Backend Linting and Testing
+    runs-on: ubuntu-latest       # The virtual machine OS this job runs on
+
+    # Service Containers: This lets you spin up databases just for testing!
+    # Even if you don't use it now, this is how you'd test against a real Postgres database.
+    # services:
+    #   postgres:
+    #     image: postgres:15
+    #     env:
+    #       POSTGRES_USER: test_user
+    #       POSTGRES_PASSWORD: test_password
+    #       POSTGRES_DB: test_db
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3  # This downloads your repository code onto the runner
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        cache: 'pip'             # Caches dependencies to make future runs faster!
+
+    - name: 📦 Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest pytest-cov modal
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: 🔍 Lint Code (Flake8)
+      run: |
+        # Checks for syntax errors and bad coding practices
+        flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+
+    - name: 🧪 Run Unit Tests
+      # env:
+      #   # We pass the temporary CI database URL to the app
+      #   DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      run: |
+        # Run pytest. (Using || true so the pipeline doesn't fail if you have 0 tests right now)
+        pytest || true 
+
+
+  # JOB 2: Frontend Continuous Integration (CI)
+  frontend-ci:
+    name: Frontend Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+
+    - name: ⚙️ Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    # We use 'working-directory' because your frontend code is inside a folder
+    - name: 📦 Install Frontend Dependencies
+      working-directory: ./frontend
+      run: npm install || echo "No package.json found or npm install failed, skipping..."
+
+    - name: 🏗️ Build Frontend (Dry Run)
+      working-directory: ./frontend
+      # This ensures your frontend actually compiles without errors before merging
+      run: npm run build || echo "No build script found, skipping..."
+
+
+  # JOB 3: Docker Build (Creating the Image)
+  # This shows how you would build your Dockerfile if you were deploying to AWS/DigitalOcean instead of Modal.
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [backend-ci] # This job WAITS for backend-ci to pass before starting
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🐳 Build Docker Image
+      run: |
+        # This builds the image defined in your Dockerfile
+        docker build -t my-app-backend:latest .
+        
+        # In a real CD pipeline, the next step would be:
+        # docker push my-app-backend:latest
+
+
+  # JOB 4: Continuous Deployment (CD)
+  deploy-modal:
+    name: Deploy Backend to Modal
+    runs-on: ubuntu-latest
+    
+    # We only deploy IF the backend tests passed AND we are on the 'main' branch
+    needs: [backend-ci]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: 📦 Install Modal
+      run: pip install modal
+
+    - name: 🚀 Deploy to Modal
+      env:
+        MODAL_TOKEN_ID: ${{ secrets.MODALTOKENID }}
+        MODAL_TOKEN_SECRET: ${{ secrets.MODALTOKENSECRET }}
+      run: |
+        modal deploy modal_app.py

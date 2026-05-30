@@ -9,6 +9,7 @@
 !requirements.txt
 !Dockerfile
 !docker-compose.yml
+!*.yml
 !.dockerignore
 !*.pdf
 # Removed !*.jpg from here to ignore resume.jpg
