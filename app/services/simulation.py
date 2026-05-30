@@ -156,14 +156,29 @@ def run_hybrid_simulation(orders: List[Order],
                 l3_adj_cost = l3_cost + (len(l3_unassigned) * config.fixed_cost_per_truck * 10)
                 
             # Compare
-            winner = "None"
+            winner = "L1"
             improvement = 0.0
             
-            if strategy == "ortools" or (strategy == "benchmark" and l2_adj_cost < float('inf') and l2_adj_cost <= l3_adj_cost):
+            if strategy == "benchmark":
+                best_cost = l1_adj_cost
+                if l2_adj_cost < float('inf') and l2_adj_cost < best_cost:
+                    best_cost = l2_adj_cost
+                    winner = "L2"
+                if l3_adj_cost < float('inf') and l3_adj_cost < best_cost:
+                    best_cost = l3_adj_cost
+                    winner = "L3"
+                    
+                if winner == "L2":
+                    current_routes = l2_routes
+                    pending_orders = l2_unassigned
+                elif winner == "L3":
+                    current_routes = l3_routes
+                    pending_orders = l3_unassigned
+            elif strategy == "ortools" and l2_adj_cost < float('inf'):
                 current_routes = l2_routes
                 pending_orders = l2_unassigned
                 winner = "L2"
-            elif strategy == "alns" or (strategy == "benchmark" and l3_adj_cost < float('inf')):
+            elif strategy == "alns" and l3_adj_cost < float('inf'):
                 current_routes = l3_routes
                 pending_orders = l3_unassigned
                 winner = "L3"
@@ -187,10 +202,14 @@ def run_hybrid_simulation(orders: List[Order],
                     improvement_pct=improvement
                 ))
                 
+                final_cost = l1_cost
+                if winner == "L2": final_cost = l2_cost
+                elif winner == "L3": final_cost = l3_cost
+                
                 events.append(SimulationEvent(
                     time=formatted_curr_time,
                     type="optimization",
-                    description=f"Global Optimization: {winner} won. Cost: {min(l2_cost, l3_cost):.2f}",
+                    description=f"Global Optimization: {winner} won. Cost: {final_cost:.2f}",
                     success=True
                 ))
                 

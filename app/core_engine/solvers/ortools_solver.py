@@ -25,8 +25,9 @@ class ORToolsSolver(BaseVRPSolver):
         map_solver_to_order = {i+1: order for i, order in enumerate(all_orders)}
         num_solver_locs = len(all_orders) + 1
         
-        # Build Solver Matrix (Order-to-Order)
-        solver_matrix = [[0] * num_solver_locs for _ in range(num_solver_locs)]
+        # Build Solver Matrices (Time and Distance)
+        time_solver_matrix = [[0] * num_solver_locs for _ in range(num_solver_locs)]
+        dist_solver_matrix = [[0] * num_solver_locs for _ in range(num_solver_locs)]
         for i in range(num_solver_locs):
             for j in range(num_solver_locs):
                 if i == j: continue
@@ -34,7 +35,9 @@ class ORToolsSolver(BaseVRPSolver):
                 idx_i = 0 if i == 0 else map_solver_to_order[i]['index']
                 idx_j = 0 if j == 0 else map_solver_to_order[j]['index']
                 
-                solver_matrix[i][j] = time_matrix[idx_i][idx_j]
+                time_solver_matrix[i][j] = time_matrix[idx_i][idx_j]
+                # Scale distance by 100 for OR-Tools integer constraints (e.g. 2.54 km -> 254)
+                dist_solver_matrix[i][j] = int(distance_matrix[idx_i][idx_j] * 100)
                 
         demands = [0] + [o['demand'] for o in all_orders]
         
@@ -47,10 +50,18 @@ class ORToolsSolver(BaseVRPSolver):
             to_node = manager.IndexToNode(to_index)
             # Service time: 1 min per stop (legacy behavior)
             service = 1 if from_node != 0 else 0
-            return int(solver_matrix[from_node][to_node]) + service
+            return int(time_solver_matrix[from_node][to_node]) + service
             
-        transit_idx = routing.RegisterTransitCallback(time_callback)
-        routing.SetArcCostEvaluatorOfAllVehicles(transit_idx)
+        time_idx = routing.RegisterTransitCallback(time_callback)
+        
+        def distance_callback(from_index, to_index):
+            from_node = manager.IndexToNode(from_index)
+            to_node = manager.IndexToNode(to_index)
+            return dist_solver_matrix[from_node][to_node]
+            
+        dist_idx = routing.RegisterTransitCallback(distance_callback)
+        # Set primary objective cost to distance instead of time
+        routing.SetArcCostEvaluatorOfAllVehicles(dist_idx)
         
         def demand_callback(from_index):
             return demands[manager.IndexToNode(from_index)]
@@ -61,7 +72,7 @@ class ORToolsSolver(BaseVRPSolver):
         )
         
         routing.AddDimension(
-            transit_idx, 30, 999999, False, 'Time' # Large max duration for now
+            time_idx, 30, 999999, False, 'Time' # Large max duration for now
         )
         time_dim = routing.GetDimensionOrDie('Time')
         for i in range(config.num_vehicles):
@@ -74,14 +85,14 @@ class ORToolsSolver(BaseVRPSolver):
         search_params = pywrapcp.DefaultRoutingSearchParameters()
         search_params.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
         search_params.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-        search_params.time_limit.FromSeconds(3)
+        search_params.time_limit.FromSeconds(30)
         
         solution = routing.SolveWithParameters(search_params)
         
         if not solution:
             print(f"[SOLVER] OR-Tools failed to find a solution. Status: {routing.status()}")
             # Inspect Matrix for issues
-            max_time = max(max(row) for row in solver_matrix)
+            max_time = max(max(row) for row in time_solver_matrix)
             print(f"[SOLVER] Max time in matrix: {max_time}")
             
         new_routes = {i: [] for i in range(config.num_vehicles)}

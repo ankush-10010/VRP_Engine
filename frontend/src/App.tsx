@@ -13,9 +13,11 @@ function App() {
   const [statusText, setStatusText] = useState<string>('');
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [requestPayload, setRequestPayload] = useState<any>(null);
 
-  const handleUploadStart = (newTaskId: string) => {
+  const handleUploadStart = (newTaskId: string, payload?: any) => {
     setTaskId(newTaskId);
+    if (payload) setRequestPayload(payload);
     setAppState('POLLING');
     setStatusText('Initiating Modal cloud container...');
   };
@@ -77,9 +79,11 @@ function App() {
       {appState === 'COMPLETED' && simulationResult && (
         <ResultsDashboard 
           result={simulationResult} 
+          requestPayload={requestPayload}
           onNewSimulation={() => {
             setSimulationResult(null);
             setTaskId(null);
+            setRequestPayload(null);
             setAppState('IDLE');
           }} 
         />

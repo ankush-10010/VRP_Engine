@@ -19,7 +19,8 @@ const UploadZone: React.FC<Props> = ({ onUploadStart, onUploadSuccess, onUploadE
         alns_iterations: 5000,
         fixed_cost_per_truck: 5000,
         variable_cost_per_km: 15,
-        alns_enabled: true
+        alns_enabled: true,
+        strategy: "benchmark"
     });
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,11 +29,12 @@ const UploadZone: React.FC<Props> = ({ onUploadStart, onUploadSuccess, onUploadE
         }
     };
 
-    const handleSettingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value, type, checked } = e.target;
+    const handleSettingChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value, type } = e.target;
+        const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : false;
         setSettings(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : Number(value)
+            [name]: type === 'checkbox' ? checked : (name === 'strategy' ? value : Number(value))
         }));
     };
 
@@ -128,7 +130,8 @@ const UploadZone: React.FC<Props> = ({ onUploadStart, onUploadSuccess, onUploadE
                                 className="w-full border rounded px-2 py-1"
                             />
                         </div>
-                        <div className="col-span-2 flex items-center">
+
+                        <div className="col-span-2 flex items-center mt-2">
                             <input
                                 type="checkbox" name="alns_enabled" checked={settings.alns_enabled} onChange={handleSettingChange}
                                 className="mr-2"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { uploadSimulationCsv } from '../api/api';
 
-export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> = ({ onUploadStart }) => {
+export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: any) => void }> = ({ onUploadStart }) => {
   const [strategy, setStrategy] = useState('benchmark');
   const [numVehicles, setNumVehicles] = useState(10);
   const [vehicleCapacity, setVehicleCapacity] = useState(20);
@@ -43,7 +43,13 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
         alns_enabled: strategy === 'benchmark' || strategy === 'alns',
       };
       const response = await uploadSimulationCsv(file, useDefaultCsv, settings, matrixMode, matrixFile);
-      onUploadStart(response.task_id);
+      onUploadStart(response.task_id, {
+        settings,
+        matrixMode,
+        useDefaultCsv,
+        fileName: file ? file.name : null,
+        matrixFileName: matrixFile ? matrixFile.name : null
+      });
     } catch (error) {
       console.error("Failed to start simulation", error);
       alert("Failed to start simulation. Please check backend connection.");
@@ -109,7 +115,8 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string) => void }> 
                       value={strategy}
                       onChange={(e) => setStrategy(e.target.value)}
                       className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface rounded-lg px-4 py-3 appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors font-body-md text-body-md cursor-pointer">
-                      <option value="benchmark">Benchmark (ALNS vs OR-Tools)</option>
+                      <option value="benchmark">ALNS + OR-Tools (Benchmark)</option>
+                      <option value="greedy">Greedy Only</option>
                       <option value="alns">ALNS Only</option>
                       <option value="ortools">OR-Tools Only</option>
                     </select>

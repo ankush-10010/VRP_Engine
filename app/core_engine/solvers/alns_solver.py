@@ -5,11 +5,11 @@ from typing import Dict, List, Tuple
 
 from .base import BaseVRPSolver
 from ...models.schemas import SimulationConfig
-from ...services.solver import calculate_raw_route_time, calculate_total_fleet_cost
+from ...services.solver import calculate_raw_route_time, calculate_total_fleet_cost, calculate_raw_route_distance
 
 class ALNSSolver(BaseVRPSolver):
-    def _repair_greedy(self, partial_routes: Dict[int, List[Dict]], request_bank: List[Dict], time_matrix: List[List[float]], config: SimulationConfig) -> Tuple[Dict[int, List[Dict]], List[Dict]]:
-        """ALNS Repair: Insert orders greedily."""
+    def _repair_greedy(self, partial_routes: Dict[int, List[Dict]], request_bank: List[Dict], time_matrix: List[List[float]], distance_matrix: List[List[float]], config: SimulationConfig) -> Tuple[Dict[int, List[Dict]], List[Dict]]:
+        """ALNS Repair: Insert orders greedily based on distance cost, constrained by time."""
         repaired = copy.deepcopy(partial_routes)
         uninserted = []
         random.shuffle(request_bank)
@@ -23,13 +23,15 @@ class ALNSSolver(BaseVRPSolver):
                 if load + order['demand'] > config.vehicle_capacity: continue
                 
                 indices = list(dict.fromkeys([o['index'] for o in route]))
-                orig_cost = calculate_raw_route_time(indices, time_matrix)
+                orig_cost = calculate_raw_route_distance(indices, distance_matrix)
                 
                 for i in range(len(route)+1):
                     temp = route[:i] + [order] + route[i:]
                     new_inds = list(dict.fromkeys([o['index'] for o in temp]))
-                    new_cost = calculate_raw_route_time(new_inds, time_matrix)
-                    if (new_cost/60.0) <= 200:
+                    new_time = calculate_raw_route_time(new_inds, time_matrix)
+                    
+                    if (new_time/60.0) <= 200:
+                        new_cost = calculate_raw_route_distance(new_inds, distance_matrix)
                         diff = new_cost - orig_cost
                         if diff < best_increase:
                             best_increase = diff
@@ -39,8 +41,8 @@ class ALNSSolver(BaseVRPSolver):
                 repaired[best_v].insert(best_i, order)
             else:
                 # Try new route
-                new_cost = calculate_raw_route_time([order['index']], time_matrix)
-                if (order['demand'] <= config.vehicle_capacity) and ((new_cost/60.0) <= 200):
+                new_time = calculate_raw_route_time([order['index']], time_matrix)
+                if (order['demand'] <= config.vehicle_capacity) and ((new_time/60.0) <= 200):
                      for v in range(config.num_vehicles):
                          if not repaired[v]:
                              repaired[v].append(order)
@@ -94,7 +96,7 @@ class ALNSSolver(BaseVRPSolver):
         for r in current_routes.values(): initial_full_pending.extend(r)
         
         start_routes = {i: [] for i in range(config.num_vehicles)}
-        curr_sol, curr_unassigned = self._repair_greedy(start_routes, initial_full_pending, time_matrix, config)
+        curr_sol, curr_unassigned = self._repair_greedy(start_routes, initial_full_pending, time_matrix, distance_matrix, config)
         
         curr_cost, _, _ = calculate_total_fleet_cost(curr_sol, distance_matrix, config)
         curr_obj = curr_cost + (len(curr_unassigned) * config.fixed_cost_per_truck * 10)
@@ -120,7 +122,7 @@ class ALNSSolver(BaseVRPSolver):
             bank.extend(curr_unassigned)
             
             # Repair
-            new_sol, new_un = self._repair_greedy(partial, bank, time_matrix, config)
+            new_sol, new_un = self._repair_greedy(partial, bank, time_matrix, distance_matrix, config)
             
             new_cost, _, _ = calculate_total_fleet_cost(new_sol, distance_matrix, config)
             new_obj = new_cost + (len(new_un) * config.fixed_cost_per_truck * 10)

@@ -14,10 +14,11 @@ import {
 
 interface ResultsDashboardProps {
   result: SimulationResult;
+  requestPayload?: any;
   onNewSimulation: () => void;
 }
 
-export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, onNewSimulation }) => {
+export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requestPayload, onNewSimulation }) => {
   const [activeVehicleIds, setActiveVehicleIds] = useState<number[]>([]);
 
   const analytics = result.analytics;
@@ -43,6 +44,32 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, onNe
         return [...prev, vId];
       }
     });
+  };
+
+  const handleExportJSON = () => {
+    const exportData = {
+      simulation_config: requestPayload,
+      summary: {
+        total_orders: result.analytics?.total_orders || 0,
+        assigned_orders: result.analytics?.assigned_orders || 0,
+        unassigned_orders: result.unassigned ? result.unassigned.length : 0,
+        success_rate: result.analytics?.success_rate || 0,
+        fleet_utilization_pct: result.analytics?.fleet_utilization_pct || 0,
+        total_distance_km: result.analytics?.total_distance_km || 0,
+        total_cost: result.total_cost || 0
+      },
+      detailed_result: result
+    };
+    const jsonString = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "simulation_result.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -74,7 +101,10 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, onNe
             <p className="font-body-md text-body-md text-on-surface-variant">Processed: {result.orders_processed} Orders</p>
           </div>
           <div className="flex gap-3">
-            <button className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 px-4 py-2 rounded-lg font-label-caps text-label-caps text-on-surface hover:bg-surface-bright transition-colors flex items-center gap-2">
+            <button 
+              onClick={handleExportJSON}
+              className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 px-4 py-2 rounded-lg font-label-caps text-label-caps text-on-surface hover:bg-surface-bright transition-colors flex items-center gap-2"
+            >
               <span className="material-symbols-outlined text-[16px]">download</span> Export JSON
             </button>
           </div>
