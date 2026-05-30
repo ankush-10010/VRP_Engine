@@ -55,12 +55,12 @@ jobs:
         flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
 
     - name: 🧪 Run Unit Tests
-      # env:
-      #   # We pass the temporary CI database URL to the app
-      #   DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+      env:
+        MODAL_TOKEN_ID: ${{ secrets.MODALTOKENID }}
+        MODAL_TOKEN_SECRET: ${{ secrets.MODALTOKENSECRET }}
       run: |
-        # Run pytest. (Using || true so the pipeline doesn't fail if you have 0 tests right now)
-        pytest || true 
+        # Run pytest. If tests fail, the pipeline stops here and DOES NOT deploy.
+        python -m pytest -v -s
 
 
   # JOB 2: Frontend Continuous Integration (CI)

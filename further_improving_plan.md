@@ -2,14 +2,13 @@
 
 This document outlines the comprehensive roadmap to elevate the VRP Optimizer from a robust prototype to a **Core SDE Production-Level System**. It also details the immediate implementation for the CSV upload UX fix requested.
 
-## Immediate Task: CSV Upload UX Fix
+<!-- ## Immediate Task: CSV Upload UX Fix
 Currently, when a user clicks "Run Simulation", the `uploadSimulationCsv` function executes but the frontend does not indicate any activity until the Modal container responds.
 
 **Proposed Change:**
 - Introduce an `isUploading` state in `LandingPage.tsx`.
 - Disable the "Run Simulation" button and render a loading spinner with text indicating "Booting Modal Container & Uploading CSV...".
-- This provides immediate visual feedback that the background process has started, bridging the gap before `App.tsx` transitions to the global `LoadingScreen`.
-
+<!-- - This provides immediate visual feedback that the background process has started, bridging the gap before `App.tsx` transitions to the global `LoadingScreen`. -->  
 ---
 
 ## The Production-Level Roadmap

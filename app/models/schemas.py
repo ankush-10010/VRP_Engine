@@ -97,6 +97,9 @@ class SimulationConfig(BaseModel):
     # Hybrid Solver Settings
     layer_2_interval: int = 600 # Seconds
     
+    # ORTools Settings
+    ortools_timeout: int = 30
+    
     # ALNS Settings (Layer 3)
     alns_enabled: bool = True
     alns_iterations: int = 5000
