@@ -136,4 +136,3 @@ jobs:
       run: |
         modal deploy modal_app.py
 
-# cvbnm,
