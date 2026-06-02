@@ -5,70 +5,110 @@ import { ResultsDashboard } from './components/ResultsDashboard';
 import { getMatrixStatus } from './api/api';
 import type { SimulationResult } from './api/api';
 
-type AppState = 'IDLE' | 'POLLING' | 'COMPLETED' | 'ERROR';
+type AppState = 'IDLE' | 'POLLING' | 'STREAMING' | 'COMPLETED' | 'ERROR';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('IDLE');
   const [taskId, setTaskId] = useState<string | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
   const [statusText, setStatusText] = useState<string>('');
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [requestPayload, setRequestPayload] = useState<any>(null);
 
-  const handleUploadStart = (newTaskId: string, payload?: any) => {
+  const handleUploadStart = (newTaskId: string, payload?: any, newJobId?: string) => {
     setTaskId(newTaskId);
+    if (newJobId) setJobId(newJobId);
     if (payload) setRequestPayload(payload);
     setAppState('POLLING');
     setStatusText('Initiating Modal cloud container...');
   };
 
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
+    let socket: WebSocket | null = null;
 
-    if (appState === 'POLLING' && taskId) {
-      let pollCount = 0;
-      const MAX_POLLS = 450; // 15 minutes timeout at 2s intervals
+    if (taskId && jobId) {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ankushraj10010--vrp-optimizer-fastapi-modal-wrapper.modal.run/api/v1';
+      const wsProtocol = API_BASE_URL.startsWith('https') ? 'wss' : 'ws';
+      const wsBase = API_BASE_URL.replace(/^https?/, wsProtocol);
+      const wsUrl = `${wsBase}/simulation/ws/${jobId}/${taskId}`;
+      
+      socket = new WebSocket(wsUrl);
+      
+      socket.onopen = () => {
+        setStatusText("Optimization running (Live Connection)...");
+      };
 
-      intervalId = setInterval(async () => {
-        pollCount++;
-        if (pollCount > MAX_POLLS) {
-          clearInterval(intervalId);
-          setAppState('ERROR');
-          setError('Task timed out. The cloud worker may have failed.');
-          return;
-        }
-
-        try {
-          const data = await getMatrixStatus(taskId);
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'progress') {
+          console.log("Progress update:", data.total_cost);
+          setStatusText(`Optimizing... Current Cost: $${data.total_cost.toFixed(2)}`);
           
-          if (data.status === 'Completed' || data.status === 'Success') {
-            setSimulationResult(data.result || null);
-            setAppState('COMPLETED');
-            clearInterval(intervalId);
-          } else if (data.status === 'Failure') {
-            setError(data.error || 'Unknown error occurred during simulation.');
-            setAppState('ERROR');
-            clearInterval(intervalId);
-          } else {
-            // Update loading text if backend provides it
-            if (data.meta?.message) {
-              setStatusText(data.meta.message);
-            } else if (data.status === 'Progress') {
-               setStatusText('Executing routing heuristics...');
+          // Stream directly to the dashboard
+          setSimulationResult(prev => {
+            if (prev) {
+              return { 
+                ...prev, 
+                routes: data.routes, 
+                total_cost: data.total_cost,
+                unassigned: data.unassigned || prev.unassigned,
+                analytics: data.analytics || prev.analytics,
+                optimization_log: data.optimization_log || prev.optimization_log,
+                events: data.events || prev.events,
+                orders_processed: data.orders_processed || prev.orders_processed
+              };
             }
-          }
-        } catch (err) {
-          console.error('Polling error', err);
-          // Don't immediately fail on network blips, keep trying until timeout
-          setStatusText('Reconnecting to cloud...');
+            return {
+              routes: data.routes,
+              total_cost: data.total_cost,
+              unassigned: data.unassigned || [],
+              optimization_log: data.optimization_log || [],
+              events: data.events || [],
+              orders_processed: data.orders_processed || 0,
+              analytics: data.analytics || {
+                total_orders: 0,
+                assigned_orders: 0,
+                success_rate: 0,
+                avg_wait_time_min: 0,
+                fleet_utilization_pct: 0,
+                total_distance_km: 0
+              }
+            } as unknown as SimulationResult;
+          });
+          
+          // Move from POLLING (Loading Screen) to STREAMING (Dashboard)
+          setAppState(prev => prev === 'POLLING' ? 'STREAMING' : prev);
         }
-      }, 2000);
+        
+        if (data.type === 'complete') {
+          console.log("Algorithm finished.");
+          setSimulationResult(data.results || null);
+          setAppState('COMPLETED');
+          socket.close();
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error("WebSocket Error:", error);
+        setError("WebSocket connection failed. The backend might be unreachable.");
+        setAppState('ERROR');
+      };
+
+      socket.onclose = (event) => {
+        if (!event.wasClean && appState === 'POLLING') {
+           console.error("WebSocket closed unexpectedly.");
+           setError("WebSocket connection dropped.");
+           setAppState('ERROR');
+        }
+      };
     }
 
     return () => {
-      if (intervalId) clearInterval(intervalId);
+      if (socket) socket.close();
     };
-  }, [appState, taskId]);
+  }, [taskId, jobId]);
 
   return (
     <div className="min-h-screen bg-background text-on-surface dark">
@@ -76,13 +116,14 @@ function App() {
       
       {appState === 'POLLING' && <LoadingScreen statusText={statusText} />}
       
-      {appState === 'COMPLETED' && simulationResult && (
+      {(appState === 'COMPLETED' || appState === 'STREAMING') && simulationResult && (
         <ResultsDashboard 
           result={simulationResult} 
           requestPayload={requestPayload}
           onNewSimulation={() => {
             setSimulationResult(null);
             setTaskId(null);
+            setJobId(null);
             setRequestPayload(null);
             setAppState('IDLE');
           }} 

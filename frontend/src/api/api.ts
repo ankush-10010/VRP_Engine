@@ -66,6 +66,7 @@ export interface SimulationResult {
 
 export interface TaskResponse {
     task_id: string;
+    job_id?: string;
     status: string;
     filename?: string;
 }

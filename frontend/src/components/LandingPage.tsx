@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { uploadSimulationCsv } from '../api/api';
 
-export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: any) => void }> = ({ onUploadStart }) => {
+export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: any, jobId?: string) => void }> = ({ onUploadStart }) => {
   const [strategy, setStrategy] = useState('benchmark');
   const [numVehicles, setNumVehicles] = useState(10);
   const [vehicleCapacity, setVehicleCapacity] = useState(20);
@@ -49,7 +49,7 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: a
         useDefaultCsv,
         fileName: file ? file.name : null,
         matrixFileName: matrixFile ? matrixFile.name : null
-      });
+      }, response.job_id);
     } catch (error) {
       console.error("Failed to start simulation", error);
       alert("Failed to start simulation. Please check backend connection.");
