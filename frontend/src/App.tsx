@@ -97,11 +97,14 @@ function App() {
       };
 
       socket.onclose = (event) => {
-        if (!event.wasClean && appState === 'POLLING') {
-           console.error("WebSocket closed unexpectedly.");
-           setError("WebSocket connection dropped.");
-           setAppState('ERROR');
-        }
+        setAppState(currentAppState => {
+           if (!event.wasClean && currentAppState === 'POLLING') {
+              console.error("WebSocket closed unexpectedly.");
+              setError("WebSocket connection dropped.");
+              return 'ERROR';
+           }
+           return currentAppState;
+        });
       };
     }
 

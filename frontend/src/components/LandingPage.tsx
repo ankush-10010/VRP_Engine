@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import { uploadSimulationCsv } from '../api/api';
 
 export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: any, jobId?: string) => void }> = ({ onUploadStart }) => {
-  const [strategy, setStrategy] = useState('benchmark');
+  const [strategy, setStrategy] = useState('alns');
   const [numVehicles, setNumVehicles] = useState(10);
   const [vehicleCapacity, setVehicleCapacity] = useState(20);
   
   // ALNS Hyperparameters
-  const [alnsIterations, setAlnsIterations] = useState(5000);
+  const [alnsIterations, setAlnsIterations] = useState(500);
   const [alnsSegmentLength, setAlnsSegmentLength] = useState(50);
   const [alnsReactionFactor, setAlnsReactionFactor] = useState(0.7);
-  const [alnsDestroyMin, setAlnsDestroyMin] = useState(0.15);
-  const [alnsDestroyMax, setAlnsDestroyMax] = useState(0.40);
+  const [alnsDestroyMin, setAlnsDestroyMin] = useState(0.50);
+  const [alnsDestroyMax, setAlnsDestroyMax] = useState(0.90);
   
   // Other Hyperparameters
-  const [layer2Interval, setLayer2Interval] = useState(600);
+  const [layer2Interval, setLayer2Interval] = useState(1800);
   const [fixedCost, setFixedCost] = useState(5000);
   const [variableCost, setVariableCost] = useState(15);
   
