@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { LoadingScreen } from './components/LoadingScreen';
 import { ResultsDashboard } from './components/ResultsDashboard';
-import { getMatrixStatus } from './api/api';
 import type { SimulationResult } from './api/api';
 
 type AppState = 'IDLE' | 'POLLING' | 'STREAMING' | 'COMPLETED' | 'ERROR';
@@ -86,7 +85,7 @@ function App() {
           console.log("Algorithm finished.");
           setSimulationResult(data.results || null);
           setAppState('COMPLETED');
-          socket.close();
+          socket?.close();
         }
       };
 
