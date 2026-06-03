@@ -114,6 +114,8 @@ def run_hybrid_simulation(orders: List[Order],
     wait_time_counts = 0
     assigned_order_ids = set()
     
+    live_metrics = {"l1_cost": 0.0, "l2_cost": 0.0}
+    
     def on_progress(best_sol, best_cost):
         if job_id and progress_dict is not None:
             try:
@@ -144,6 +146,17 @@ def run_hybrid_simulation(orders: List[Order],
                     "fleet_utilization_pct": fleet_utilization_pct,
                     "total_distance_km": total_dist
                 }
+
+                live_entry = OptimizationLogEntry(
+                    iteration=len(optimization_log) + 1,
+                    timestamp=formatted_curr_time if 'formatted_curr_time' in locals() else "LIVE",
+                    l1_cost=live_metrics["l1_cost"] if live_metrics["l1_cost"] != float('inf') else 0.0,
+                    l2_cost=live_metrics["l2_cost"] if live_metrics["l2_cost"] != float('inf') else 0.0,
+                    l3_cost=real_cost,
+                    winner="L3 (Refining)",
+                    improvement_pct=0.0
+                )
+                optimization_log.append(live_entry)
 
                 progress_dict[job_id] = {
                     "type": "progress",
@@ -221,6 +234,8 @@ def run_hybrid_simulation(orders: List[Order],
             # Calculate L1 cost before optimization
             l1_cost, _, _ = solver.calculate_total_fleet_cost(current_routes, distance_matrix, config)
             l1_adj_cost = l1_cost + (len(pending_orders) * config.fixed_cost_per_truck * 10)
+            live_metrics["l1_cost"] = l1_adj_cost
+            live_metrics["l2_cost"] = 0.0 # Reset L2 cost
             
             l2_cost = float('inf')
             l3_cost = float('inf')
@@ -237,6 +252,7 @@ def run_hybrid_simulation(orders: List[Order],
                 l2_routes, l2_unassigned = ortools_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config, progress_callback=on_progress)
                 l2_cost, _, _ = solver.calculate_total_fleet_cost(l2_routes, distance_matrix, config)
                 l2_adj_cost = l2_cost + (len(l2_unassigned) * config.fixed_cost_per_truck * 10)
+                live_metrics["l2_cost"] = l2_cost
                 print(f"[SIMULATION] ORToolsSolver returned.")
                 on_progress(l2_routes, l2_cost)
                 
@@ -276,7 +292,7 @@ def run_hybrid_simulation(orders: List[Order],
                 winner = "L3"
                 
             if winner != "None":
-                # Log Analytics
+                # Log Analytics (Final block summary)
                 # Avoid infinite improvement calc
                 valid_costs = [c for c in [l2_cost, l3_cost] if c != float('inf')]
                 if len(valid_costs) == 2:
@@ -290,7 +306,7 @@ def run_hybrid_simulation(orders: List[Order],
                     l1_cost=l1_adj_cost if l1_adj_cost != float('inf') else 0.0,
                     l2_cost=l2_cost if l2_cost != float('inf') else 0.0,
                     l3_cost=l3_cost if l3_cost != float('inf') else 0.0,
-                    winner=winner,
+                    winner=f"{winner} (Final)",
                     improvement_pct=improvement
                 ))
                 
@@ -309,6 +325,10 @@ def run_hybrid_simulation(orders: List[Order],
                 for r in current_routes.values():
                     for o in r:
                         assigned_order_ids.add(o['id'])
+                        
+                # Ensure the final completed block is streamed
+                if job_id and progress_dict is not None:
+                    on_progress(current_routes, 0)
                         
     # --- 3. Finalize ---
     

@@ -120,22 +120,7 @@ async def geocode_locations(request: GeocodeRequest, api_key: str = Depends(get_
     locations, failed = geocoding.geocode_addresses(request.addresses, api_key)
     return GeocodeResponse(locations=locations, failed_addresses=failed)
 
-@router.get("/matrix-status/{task_id}")
-async def get_matrix_status(task_id: str):
-    """
-    Check the status of a background matrix task on Modal.
-    """
-    import modal
-    
-    try:
-        call = modal.FunctionCall.from_id(task_id)
-        # Check if the cloud server finished the math without blocking
-        result = call.get(timeout=0.1)
-        return {"status": "Completed", "result": result}
-    except TimeoutError:
-        return {"status": "Progress", "meta": {"message": "Processing in Modal cloud..."}}
-    except Exception as e:
-        return {"status": "Failure", "error": str(e)}
+
 
 @router.post("/simulation/upload-csv")
 async def upload_simulation_csv(
@@ -208,6 +193,7 @@ async def simulation_websocket(websocket: WebSocket, job_id: str, task_id: str):
     
     try:
         last_cost = None
+        loop_counter = 0
         while True:
             # Look up this specific task's progress
             if job_id in progress_dict:
@@ -225,6 +211,10 @@ async def simulation_websocket(websocket: WebSocket, job_id: str, task_id: str):
                 await websocket.send_json({"type": "complete", "results": result})
                 break
             except TimeoutError:
+                loop_counter += 1
+                if loop_counter >= 5: # Every 5 seconds
+                    await websocket.send_json({"type": "ping"})
+                    loop_counter = 0
                 await asyncio.sleep(1)
                 
     except Exception as e:

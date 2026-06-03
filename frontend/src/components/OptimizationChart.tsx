@@ -28,29 +28,39 @@ interface Props {
 
 const OptimizationChart: React.FC<Props> = ({ log }) => {
 
-    // Filter out initial empty state if needed
-    const validLog = log.filter(l => l.l2_cost > 0 && l.l3_cost > 0 && l.l2_cost !== Infinity && l.l3_cost !== Infinity);
+    // Filter out initial empty state if needed (allow 0 for single solver modes)
+    const validLog = log.filter(l => l.l2_cost !== Infinity && l.l3_cost !== Infinity);
 
-    const labels = validLog.map(entry => entry.timestamp);
+    const labels = validLog.map(entry => entry.timestamp === "LIVE" ? `Update ${entry.iteration}` : entry.timestamp);
+
+    const hasL2 = validLog.some(e => e.l2_cost > 0);
+    const hasL3 = validLog.some(e => e.l3_cost > 0);
+
+    const datasets = [];
+    
+    if (hasL2) {
+        datasets.push({
+            label: 'Layer 2 (OR-Tools) Cost',
+            data: validLog.map(e => e.l2_cost),
+            borderColor: 'rgb(53, 162, 235)',
+            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+            tension: 0.1,
+        });
+    }
+
+    if (hasL3) {
+        datasets.push({
+            label: 'Layer 3 (ALNS) Cost',
+            data: validLog.map(e => e.l3_cost),
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            tension: 0.1,
+        });
+    }
 
     const data = {
         labels,
-        datasets: [
-            {
-                label: 'Layer 2 (OR-Tools) Cost',
-                data: validLog.map(e => e.l2_cost),
-                borderColor: 'rgb(53, 162, 235)',
-                backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                tension: 0.1,
-            },
-            {
-                label: 'Layer 3 (ALNS) Cost',
-                data: validLog.map(e => e.l3_cost),
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                tension: 0.1,
-            },
-        ],
+        datasets,
     };
 
     const options = {

@@ -98,7 +98,7 @@ class SimulationConfig(BaseModel):
     layer_2_interval: int = 1800 # Seconds
     
     # ORTools Settings
-    ortools_timeout: int = 30
+    ortools_timeout: int = 5
     
     # ALNS Settings (Layer 3)
     alns_enabled: bool = True

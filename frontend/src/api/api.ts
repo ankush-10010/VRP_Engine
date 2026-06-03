@@ -114,7 +114,3 @@ export const uploadSimulationCsv = async (file: File | null, useDefaultCsv: bool
     throw new Error("Failed to upload after retries");
 };
 
-export const getMatrixStatus = async (taskId: string): Promise<{ status: string; result?: SimulationResult; meta?: any; error?: string }> => {
-    const response = await axios.get(`${API_BASE_URL}/matrix-status/${taskId}`);
-    return response.data;
-};
