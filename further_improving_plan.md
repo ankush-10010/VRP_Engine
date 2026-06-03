@@ -15,14 +15,14 @@ Currently, when a user clicks "Run Simulation", the `uploadSimulationCsv` functi
 
 The following phases outline the missing architectural pillars required for top-tier software engineering resumes.
 
-### Phase 1: CI/CD & Automated Quality Gates (The "Shippable" Pillar)
+<!-- ### Phase 1: CI/CD & Automated Quality Gates (The "Shippable" Pillar)
 **Goal:** Prove that the codebase can scale collaboratively without breaking.
 - **GitHub Actions Pipeline:** Implement a `.github/workflows/main.yml` file.
 - **Automated Testing:** 
   - Add `pytest` for the FastAPI backend to unit-test the ALNS and OR-Tools logic.
   - Add `jest` or `vitest` for React component testing.
 - **Linting & Formatting:** Enforce `flake8` / `black` for Python and `eslint` for TypeScript in the pipeline.
-- **Automated Deployment:** Configure the pipeline to automatically deploy to Vercel and Modal only when all tests pass.
+- **Automated Deployment:** Configure the pipeline to automatically deploy to Vercel and Modal only when all tests pass. -->
 
 ### Phase 2: Caching & API Resiliency (The "Scale" Pillar)
 **Goal:** Demonstrate enterprise-level cost management and performance scaling.

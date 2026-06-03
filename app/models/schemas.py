@@ -84,7 +84,7 @@ class OptimizationResponse(BaseModel):
 
 class SimulationConfig(BaseModel):
     # Overall Strategy
-    strategy: str = "benchmark"  # "benchmark", "alns", "ortools", "tabu"
+    strategy: str = "alns"  # "benchmark", "alns", "ortools", "tabu"
 
     # Fleet Settings
     num_vehicles: int = 10
@@ -95,15 +95,15 @@ class SimulationConfig(BaseModel):
     variable_cost_per_km: float = 15.0
     
     # Hybrid Solver Settings
-    layer_2_interval: int = 600 # Seconds
+    layer_2_interval: int = 1800 # Seconds
     
     # ORTools Settings
     ortools_timeout: int = 30
     
     # ALNS Settings (Layer 3)
     alns_enabled: bool = True
-    alns_iterations: int = 5000
+    alns_iterations: int = 500
     alns_segment_length: int = 50
     alns_reaction_factor: float = 0.7
-    alns_destroy_min_pct: float = 0.15
-    alns_destroy_max_pct: float = 0.40
+    alns_destroy_min_pct: float = 0.50
+    alns_destroy_max_pct: float = 0.90

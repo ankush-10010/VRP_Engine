@@ -9,7 +9,8 @@ class BaseVRPSolver(ABC):
               pending_orders: List[Dict],
               time_matrix: List[List[float]], 
               distance_matrix: List[List[float]],
-              config: SimulationConfig) -> Tuple[Dict[int, List[Dict]], List[Dict]]:
+              config: SimulationConfig,
+              progress_callback=None) -> Tuple[Dict[int, List[Dict]], List[Dict]]:
         """
         Executes the optimization algorithm.
         

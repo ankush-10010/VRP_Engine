@@ -89,7 +89,8 @@ class ALNSSolver(BaseVRPSolver):
               pending_orders: List[Dict],
               time_matrix: List[List[float]], 
               distance_matrix: List[List[float]],
-              config: SimulationConfig) -> Tuple[Dict[int, List[Dict]], List[Dict]]:
+              config: SimulationConfig,
+              progress_callback=None) -> Tuple[Dict[int, List[Dict]], List[Dict]]:
         
         # Initial Solution: Greedy repair of everything
         initial_full_pending = pending_orders[:]
@@ -109,6 +110,8 @@ class ALNSSolver(BaseVRPSolver):
         cooling = 0.995
         
         iterations = config.alns_iterations
+        
+        print(f"[ALNS DEBUG] Initial assigned: {sum(len(r) for r in curr_sol.values())}, Initial unassigned: {len(curr_unassigned)}, Best Obj: {best_obj}")
         
         for i in range(iterations):
             # Only 1 operator pair implemented for now
@@ -136,6 +139,8 @@ class ALNSSolver(BaseVRPSolver):
                     best_sol = copy.deepcopy(new_sol)
                     best_unassigned = new_un[:]
                     best_obj = new_obj
+                    if progress_callback:
+                        progress_callback(best_sol, best_obj)
             else:
                  if random.random() < math.exp(-delta / temp):
                      accept = True
@@ -147,4 +152,5 @@ class ALNSSolver(BaseVRPSolver):
                 
             temp *= cooling
             
+        print(f"[ALNS DEBUG] Finished 500 iterations. Final assigned: {sum(len(r) for r in best_sol.values())}, Final unassigned: {len(best_unassigned)}, Best Obj: {best_obj}")
         return best_sol, best_unassigned

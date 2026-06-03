@@ -7,6 +7,9 @@ import os
 # Create the Modal App
 app = modal.App("vrp-optimizer")
 
+# Create a shared dictionary to store real-time progress for WebSockets
+progress_dict = modal.Dict.from_name("vrp-progress-dict", create_if_missing=True)
+
 # Define the image with all dependencies and mount the app directory
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -19,7 +22,7 @@ image = (
 )
 
 @app.function(timeout=3600, image=image, secrets=[modal.Secret.from_name("custom-secret")])
-def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = None, matrix_mode: str = "scratch", custom_matrix_data: dict = None):
+def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = None, matrix_mode: str = "scratch", custom_matrix_data: dict = None, job_id: str = None):
     """
     Full pipeline: Parse CSV -> Geocode -> Matrix -> Hybrid Simulation on Modal.
     """
@@ -166,9 +169,18 @@ def modal_simulation_task(file_content: str, api_key: str, config_dict: dict = N
         orders=orders,
         time_matrix=solver_matrix,
         distance_matrix=solver_dist_matrix,
-        config=config
+        config=config,
+        job_id=job_id,
+        progress_dict=progress_dict
     )
     print(f"[MODAL WORKER] Simulation Complete. Routes: {len(sim_response.routes)}")
+    
+    if job_id:
+        progress_dict[job_id] = {
+            "type": "progress",
+            "routes": [route.dict() for route in sim_response.routes],
+            "total_cost": sim_response.total_fleet_cost
+        }
     
     result_data = {
         "status": "Completed",

@@ -15,10 +15,53 @@ def format_time(minutes_from_start: int, start_hour: int = 8) -> str:
     m = total_minutes % 60
     return f"{h:02d}:{m:02d}"
 
+def build_frontend_routes(current_routes: Dict[int, List[Dict]], time_matrix: List[List[float]]) -> List[VehicleRoute]:
+    final_routes = []
+    for v_id, route_orders in current_routes.items():
+        if not route_orders: continue
+        
+        steps = []
+        current_time = 0.0 
+        last_idx = 0
+        depot_lat = 28.5707
+        depot_lng = 77.3262
+        
+        steps.append(RouteStep(
+            stop_index=0, address="Depot", lat=depot_lat, lng=depot_lng,
+            arrival_time_min=0, departure_time_min=0
+        ))
+        
+        for order in route_orders:
+            idx = order['index']
+            travel_sec = time_matrix[last_idx][idx]
+            accum_min = current_time + (travel_sec / 60.0)
+            orig = order['original_order'].location
+            steps.append(RouteStep(
+                stop_index=idx, address=orig.original_address,
+                lat=orig.latitude or 0.0, lng=orig.longitude or 0.0,
+                arrival_time_min=accum_min, departure_time_min=accum_min + 5
+            ))
+            current_time = accum_min + 5
+            last_idx = idx
+            
+        travel_sec = time_matrix[last_idx][0]
+        end_min = current_time + (travel_sec / 60.0)
+        steps.append(RouteStep(
+            stop_index=0, address="Depot", lat=depot_lat, lng=depot_lng,
+            arrival_time_min=end_min, departure_time_min=end_min
+        ))
+        
+        final_routes.append(VehicleRoute(
+            vehicle_id=v_id, steps=steps, total_cost=0.0, total_time_min=end_min
+        ))
+    return final_routes
+
 def run_hybrid_simulation(orders: List[Order], 
                           time_matrix: List[List[float]], 
                           distance_matrix: List[List[float]],
-                          config: SimulationConfig) -> OptimizationResponse:
+                          config: SimulationConfig,
+                          job_id: str = None,
+                          progress_dict: Any = None) -> OptimizationResponse:
     """
     Simulates the delivery day, processing orders as they 'arrive'.
     Tracks analytics and events for frontend visualization.
@@ -71,6 +114,51 @@ def run_hybrid_simulation(orders: List[Order],
     wait_time_counts = 0
     assigned_order_ids = set()
     
+    def on_progress(best_sol, best_cost):
+        if job_id and progress_dict is not None:
+            try:
+                real_cost, num_trucks, total_dist = solver.calculate_total_fleet_cost(best_sol, distance_matrix, config)
+                formatted_routes = build_frontend_routes(best_sol, time_matrix)
+                
+                # Calculate Analytics
+                total_capacity_used = 0
+                assigned_order_ids_progress = set()
+                for v_id, route_orders in best_sol.items():
+                    total_capacity_used += sum([o['demand'] for o in route_orders])
+                    for o in route_orders:
+                        assigned_order_ids_progress.add(o['id'])
+                
+                fleet_capacity = num_trucks * config.vehicle_capacity if num_trucks > 0 else 1
+                total_orders_count = len(orders)
+                assigned_orders_count = len(assigned_order_ids_progress)
+                success_rate = (assigned_orders_count / total_orders_count * 100) if total_orders_count > 0 else 0
+                fleet_utilization_pct = (total_capacity_used / fleet_capacity * 100) if fleet_capacity > 0 else 0
+                
+                unassigned = [o.order_id for o in orders if o.order_id not in assigned_order_ids_progress]
+                
+                analytics = {
+                    "total_orders": total_orders_count,
+                    "assigned_orders": assigned_orders_count,
+                    "success_rate": success_rate,
+                    "avg_wait_time_min": 0.0,
+                    "fleet_utilization_pct": fleet_utilization_pct,
+                    "total_distance_km": total_dist
+                }
+
+                progress_dict[job_id] = {
+                    "type": "progress",
+                    "routes": [r.dict() for r in formatted_routes],
+                    "total_cost": real_cost,
+                    "unassigned": unassigned,
+                    "analytics": analytics,
+                    "optimization_log": [log.dict() for log in optimization_log],
+                    "events": [event.dict() for event in events],
+                    "orders_processed": total_orders_count
+                }
+                print(f"[SIMULATION] Streamed progress update to frontend. Cost: {real_cost:.2f}")
+            except Exception as e:
+                print(f"[SIMULATION ERROR] Failed to stream progress: {e}")
+                
     # --- 2. Time Loop ---
     for current_minute in range(0, simulation_duration_minutes + 1):
         formatted_curr_time = format_time(current_minute)
@@ -100,6 +188,10 @@ def run_hybrid_simulation(orders: List[Order],
                     ))
                     # Zero wait time for instant assignment (simplification)
                     wait_time_counts += 1
+                    
+                    # Stream live update for greedy assignments if progress_dict is available
+                    if job_id and progress_dict is not None and current_minute % 15 == 0:
+                        on_progress(current_routes, 0)
                 else:
                     pending_orders.append(new_order)
                     events.append(SimulationEvent(
@@ -142,17 +234,17 @@ def run_hybrid_simulation(orders: List[Order],
             if strategy in ["ortools", "benchmark"]:
                 print(f"[SIMULATION] Calling ORToolsSolver...")
                 ortools_solver = SolverFactory.create_solver("ortools")
-                l2_routes, l2_unassigned = ortools_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config)
-                print(f"[SIMULATION] ORToolsSolver returned.")
+                l2_routes, l2_unassigned = ortools_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config, progress_callback=on_progress)
                 l2_cost, _, _ = solver.calculate_total_fleet_cost(l2_routes, distance_matrix, config)
                 l2_adj_cost = l2_cost + (len(l2_unassigned) * config.fixed_cost_per_truck * 10)
-
+                print(f"[SIMULATION] ORToolsSolver returned.")
+                on_progress(l2_routes, l2_cost)
+                
             if strategy in ["alns", "benchmark"] and config.alns_enabled:
                 print(f"[SIMULATION] Calling ALNSSolver...")
                 alns_solver = SolverFactory.create_solver("alns")
-                l3_routes, l3_unassigned = alns_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config)
+                l3_routes, l3_unassigned = alns_solver.solve(current_routes, pending_orders, time_matrix, distance_matrix, config, progress_callback=on_progress)
                 print(f"[SIMULATION] ALNSSolver returned.")
-                l3_cost, _, _ = solver.calculate_total_fleet_cost(l3_routes, distance_matrix, config)
                 l3_adj_cost = l3_cost + (len(l3_unassigned) * config.fixed_cost_per_truck * 10)
                 
             # Compare
@@ -222,70 +314,12 @@ def run_hybrid_simulation(orders: List[Order],
     
     total_cost, num_trucks, total_dist = solver.calculate_total_fleet_cost(current_routes, distance_matrix, config)
     
-    final_routes = []
-    total_capacity_used = 0
+    final_routes = build_frontend_routes(current_routes, time_matrix)
     
+    # Calculate total capacity used for analytics
+    total_capacity_used = 0
     for v_id, route_orders in current_routes.items():
-        if not route_orders: continue
-        
-        steps = []
-        current_time = 0.0 
-        last_idx = 0
-        
-        # Depot Start
-        depot_lat = 28.5707  # Hardcoded depot
-        depot_lng = 77.3262
-        
-        steps.append(RouteStep(
-            stop_index=0, 
-            address="Depot", 
-            lat=depot_lat,
-            lng=depot_lng,
-            arrival_time_min=0, 
-            departure_time_min=0
-        ))
-        
-        route_cap = 0
-        for order in route_orders:
-            idx = order['index']
-            travel_sec = time_matrix[last_idx][idx]
-            accum_min = current_time + (travel_sec / 60.0)
-            
-            orig = order['original_order'].location
-            
-            steps.append(RouteStep(
-                stop_index=idx,
-                address=orig.original_address,
-                lat=orig.latitude or 0.0,
-                lng=orig.longitude or 0.0,
-                arrival_time_min=accum_min,
-                departure_time_min=accum_min + 5
-            ))
-            
-            current_time = accum_min + 5
-            last_idx = idx
-            route_cap += order['demand']
-            
-        total_capacity_used += route_cap
-        
-        # Depot End
-        travel_sec = time_matrix[last_idx][0]
-        end_min = current_time + (travel_sec / 60.0)
-        steps.append(RouteStep(
-            stop_index=0, 
-            address="Depot",
-            lat=depot_lat,
-            lng=depot_lng, 
-            arrival_time_min=end_min, 
-            departure_time_min=end_min
-        ))
-        
-        final_routes.append(VehicleRoute(
-            vehicle_id=v_id,
-            steps=steps,
-            total_cost=0.0,
-            total_time_min=end_min
-        ))
+        total_capacity_used += sum([o['demand'] for o in route_orders])
         
     # Analytics Metrics
     total_orders = len(orders)
