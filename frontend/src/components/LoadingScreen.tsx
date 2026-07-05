@@ -8,7 +8,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ statusText }) => {
   return (
     <div className="bg-background text-on-surface min-h-screen flex flex-col items-center justify-center overflow-hidden relative w-full h-full">
       {/* Decorative ambient background glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-container/10 via-background to-background pointer-events-none"></div>
 
       {/* Main Processing Card */}
       <div className="relative z-10 flex flex-col items-center justify-center p-[40px] md:p-[64px] max-w-3xl w-full mx-margin-mobile md:mx-margin-desktop bg-surface-container-low/40 backdrop-blur-2xl rounded-2xl border border-white/5 shadow-2xl">
@@ -16,12 +16,12 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ statusText }) => {
         {/* Pulsing/Spinning Icon Assembly */}
         <div className="relative flex items-center justify-center mb-[48px] w-32 h-32">
           {/* Outer spinning rings */}
-          <div className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary/80 animate-spin" style={{ animationDuration: '3s' }}></div>
+          <div className="absolute inset-0 rounded-full border-2 border-primary-container/20 border-t-primary-container/80 animate-spin" style={{ animationDuration: '3s' }}></div>
           <div className="absolute inset-4 rounded-full border border-secondary/20 border-b-secondary/60 animate-spin" style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
           {/* Core glowing pulse */}
-          <div className="absolute inset-8 bg-primary/20 rounded-full animate-pulse blur-xl"></div>
+          <div className="absolute inset-8 bg-primary-container/20 rounded-full animate-pulse blur-xl"></div>
           {/* Primary Icon */}
-          <span className="material-symbols-outlined text-[64px] text-primary relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <span className="material-symbols-outlined text-[64px] text-primary-container relative z-10" style={{ fontVariationSettings: "'FILL' 1" }}>
             hub
           </span>
         </div>
@@ -37,18 +37,18 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ statusText }) => {
           <div className="flex items-center gap-[16px] text-on-surface-variant opacity-60">
             <span className="material-symbols-outlined text-[20px]">check_circle</span>
             <span className="truncate">&gt; Geocoding addresses...</span>
-            <span className="ml-auto text-primary opacity-50">[100%]</span>
+            <span className="ml-auto text-primary-container opacity-50">[100%]</span>
           </div>
 
           {/* Completed Step 2 */}
           <div className="flex items-center gap-[16px] text-on-surface-variant opacity-60">
             <span className="material-symbols-outlined text-[20px]">check_circle</span>
             <span className="truncate">&gt; Computing distance matrix...</span>
-            <span className="ml-auto text-primary opacity-50">[100%]</span>
+            <span className="ml-auto text-primary-container opacity-50">[100%]</span>
           </div>
 
           {/* Active Step */}
-          <div className="flex items-center gap-[16px] text-primary animate-pulse">
+          <div className="flex items-center gap-[16px] text-primary-container animate-pulse">
             <span className="material-symbols-outlined text-[20px] animate-spin">sync</span>
             <span className="truncate">&gt; {statusText || 'Executing ALNS Heuristics...'}</span>
             <span className="ml-auto">_</span>

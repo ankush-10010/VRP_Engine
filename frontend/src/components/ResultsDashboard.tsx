@@ -77,13 +77,13 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
       {/* TopNavBar */}
       <nav className="bg-surface/70 backdrop-blur-xl flex justify-between items-center px-margin-desktop h-20 w-full fixed top-0 z-50 border-b border-white/10 shadow-2xl">
         <div className="flex items-center gap-8">
-          <h1 className="font-headline-lg text-headline-lg font-bold text-primary tracking-tighter hidden md:block">VRP Engine</h1>
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary tracking-tighter md:hidden">VRP Engine</h1>
+          <h1 className="font-headline-lg text-headline-lg font-bold text-primary-container tracking-tighter hidden md:block">VRP Engine</h1>
+          <h1 className="font-headline-md text-headline-md font-bold text-primary-container tracking-tighter md:hidden">VRP Engine</h1>
         </div>
         <div className="flex items-center gap-6">
           <button 
             onClick={onNewSimulation}
-            className="flex bg-gradient-to-r from-primary-container to-secondary-container text-on-primary-container font-label-caps text-label-caps px-6 py-3 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-90 transition-opacity items-center gap-2"
+            className="flex bg-primary-container text-on-primary-container font-label-mono-sm text-label-mono-sm px-6 py-3 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] hover:opacity-90 transition-opacity items-center gap-2"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             New Simulation
@@ -97,13 +97,13 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="font-headline-xl text-headline-xl text-on-surface mb-2">Simulation Results</h2>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-2">Simulation Results</h2>
             <p className="font-body-md text-body-md text-on-surface-variant">Processed: {result.orders_processed} Orders</p>
           </div>
           <div className="flex gap-3">
             <button 
               onClick={handleExportJSON}
-              className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 px-4 py-2 rounded-lg font-label-caps text-label-caps text-on-surface hover:bg-surface-bright transition-colors flex items-center gap-2"
+              className="glass-panel px-4 py-2 rounded-lg font-label-mono-sm text-label-mono-sm text-on-surface hover:bg-surface-bright transition-colors flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-[16px]">download</span> Export JSON
             </button>
@@ -112,56 +112,56 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
 
         {/* KPI Ribbon (Top) */}
         <section className="grid grid-cols-2 md:grid-cols-5 gap-unit md:gap-gutter">
-          <div className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 p-6 rounded-xl flex flex-col justify-between h-full">
-            <p className="font-label-caps text-label-caps text-on-surface-variant mb-4">Total Orders Processed</p>
+          <div className="glass-panel p-6 rounded-xl flex flex-col justify-between h-full bg-surface">
+            <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant mb-4 uppercase">Total Orders Processed</p>
             <div className="flex items-end justify-between">
-              <p className="font-data-display text-data-display text-3xl font-bold text-on-surface">{analytics?.total_orders || 0}</p>
-              <span className="material-symbols-outlined text-primary opacity-50 text-3xl">list_alt</span>
+              <p className="font-label-mono-md text-3xl font-bold text-on-surface">{analytics?.total_orders || 0}</p>
+              <span className="material-symbols-outlined text-primary-container opacity-50 text-3xl">list_alt</span>
             </div>
           </div>
 
-          <div className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 p-6 rounded-xl flex flex-col justify-between h-full border-t-2 border-t-[#34d399]">
-            <p className="font-label-caps text-label-caps text-on-surface-variant mb-4">Success Rate</p>
+          <div className="glass-panel p-6 rounded-xl flex flex-col justify-between h-full border-t-2 border-t-primary-container bg-surface">
+            <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant mb-4 uppercase">Success Rate</p>
             <div className="flex items-end justify-between">
-              <p className="font-data-display text-data-display text-3xl font-bold text-[#34d399]">
+              <p className="font-label-mono-md text-3xl font-bold text-primary-container">
                 {analytics?.success_rate ? analytics.success_rate.toFixed(1) : 0}%
               </p>
-              <span className="material-symbols-outlined text-[#34d399] opacity-50 text-3xl">check_circle</span>
+              <span className="material-symbols-outlined text-primary-container opacity-50 text-3xl">check_circle</span>
             </div>
           </div>
 
-          <div className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 p-6 rounded-xl flex flex-col justify-between h-full">
-            <p className="font-label-caps text-label-caps text-on-surface-variant mb-4">Fleet Utilization</p>
+          <div className="glass-panel p-6 rounded-xl flex flex-col justify-between h-full bg-surface">
+            <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant mb-4 uppercase">Fleet Utilization</p>
             <div>
               <div className="flex items-end justify-between mb-2">
-                <p className="font-data-display text-data-display text-3xl font-bold text-on-surface">
+                <p className="font-label-mono-md text-3xl font-bold text-on-surface">
                   {analytics?.fleet_utilization_pct ? analytics.fleet_utilization_pct.toFixed(0) : 0}%
                 </p>
-                <span className="material-symbols-outlined text-primary opacity-50 text-3xl">local_shipping</span>
+                <span className="material-symbols-outlined text-primary-container opacity-50 text-3xl">local_shipping</span>
               </div>
               <div className="w-full bg-surface-container-highest rounded-full h-1.5">
-                <div className="bg-primary h-1.5 rounded-full" style={{ width: `${analytics?.fleet_utilization_pct || 0}%` }}></div>
+                <div className="bg-primary-container h-1.5 rounded-full" style={{ width: `${analytics?.fleet_utilization_pct || 0}%` }}></div>
               </div>
             </div>
           </div>
 
-          <div className="bg-surface-container-low/70 backdrop-blur-md border border-white/10 p-6 rounded-xl flex flex-col justify-between h-full">
-            <p className="font-label-caps text-label-caps text-on-surface-variant mb-4">Total Fleet Cost</p>
+          <div className="glass-panel p-6 rounded-xl flex flex-col justify-between h-full bg-surface">
+            <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant mb-4 uppercase">Total Fleet Cost</p>
             <div className="flex items-end justify-between">
-              <p className="font-data-display text-data-display text-3xl font-bold text-on-surface">
+              <p className="font-label-mono-md text-3xl font-bold text-on-surface">
                 ${result.total_cost?.toLocaleString(undefined, { maximumFractionDigits: 0 })}
               </p>
-              <span className="material-symbols-outlined text-primary opacity-50 text-3xl">payments</span>
+              <span className="material-symbols-outlined text-primary-container opacity-50 text-3xl">payments</span>
             </div>
           </div>
 
-          <div className={`bg-surface-container-low/70 backdrop-blur-md border border-white/10 p-6 rounded-xl flex flex-col justify-between h-full ${unassignedCount > 0 ? 'border-t-2 border-t-error' : ''}`}>
-            <p className="font-label-caps text-label-caps text-on-surface-variant mb-4">Unassigned Orders</p>
+          <div className={`glass-panel p-6 rounded-xl flex flex-col justify-between h-full bg-surface ${unassignedCount > 0 ? 'border-t-2 border-t-error' : ''}`}>
+            <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant mb-4 uppercase">Unassigned Orders</p>
             <div className="flex items-end justify-between">
-              <p className={`font-data-display text-data-display text-3xl font-bold ${unassignedCount > 0 ? 'text-error' : 'text-[#34d399]'}`}>
+              <p className={`font-label-mono-md text-3xl font-bold ${unassignedCount > 0 ? 'text-error' : 'text-primary-container'}`}>
                 {unassignedCount}
               </p>
-              <span className={`material-symbols-outlined opacity-50 text-3xl ${unassignedCount > 0 ? 'text-error' : 'text-[#34d399]'}`}>
+              <span className={`material-symbols-outlined opacity-50 text-3xl ${unassignedCount > 0 ? 'text-error' : 'text-primary-container'}`}>
                 {unassignedCount > 0 ? 'warning' : 'check_circle'}
               </span>
             </div>
@@ -171,15 +171,15 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
         {/* Middle Row (60/40 Split) */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-gutter min-h-[400px]">
           {/* Left (60%): Interactive Route Map Placeholder */}
-          <div className="lg:col-span-7 bg-[#0f172a]/70 backdrop-blur-md rounded-xl overflow-hidden flex flex-col relative border border-white/5 shadow-lg">
+          <div className="lg:col-span-7 glass-panel rounded-xl overflow-hidden flex flex-col relative border border-white/5 shadow-lg bg-surface">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-surface-container-low/50 z-10 flex-wrap gap-4">
-              <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Interactive Route Map</h3>
+              <h3 className="font-headline-md text-headline-md text-on-surface">Interactive Route Map</h3>
               <div className="flex gap-2 flex-wrap max-w-[60%]">
                 <button 
                   onClick={() => setActiveVehicleIds([])}
-                  className={`px-3 py-1 rounded-full font-label-caps text-label-caps text-[10px] transition-colors border ${
+                  className={`px-3 py-1 rounded-full font-label-mono-sm text-label-mono-sm transition-colors border ${
                     activeVehicleIds.length === 0 
-                      ? 'bg-primary/20 text-primary border-primary/50' 
+                      ? 'bg-primary-container/20 text-primary-container border-primary-container/50' 
                       : 'bg-surface-container-highest text-on-surface-variant border-white/10 hover:bg-surface-bright'
                   }`}
                 >
@@ -189,9 +189,9 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
                   <button 
                     key={route.vehicle_id}
                     onClick={() => handleVehicleToggle(route.vehicle_id)}
-                    className={`px-3 py-1 rounded-full font-label-caps text-label-caps text-[10px] transition-colors border ${
+                    className={`px-3 py-1 rounded-full font-label-mono-sm text-label-mono-sm transition-colors border ${
                       activeVehicleIds.includes(route.vehicle_id) 
-                        ? 'bg-primary/20 text-primary border-primary/50' 
+                        ? 'bg-primary-container/20 text-primary-container border-primary-container/50' 
                         : 'bg-surface-container-highest text-on-surface-variant border-white/10 hover:bg-surface-bright'
                     }`}
                   >
@@ -201,7 +201,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
               </div>
             </div>
             
-            <div className="flex-grow relative flex items-center justify-center bg-[#080c17] w-full">
+            <div className="flex-grow bg-grid-pattern relative flex items-center justify-center bg-surface-container-low w-full">
               <ResultsMap 
                 routes={activeVehicleIds.length > 0 && result.routes 
                   ? result.routes.filter(r => activeVehicleIds.includes(r.vehicle_id))
@@ -211,9 +211,9 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
           </div>
 
           {/* Right (40%): Algorithm Convergence */}
-          <div className="lg:col-span-5 bg-[#0f172a]/70 backdrop-blur-md rounded-xl p-6 flex flex-col relative border border-white/5 shadow-lg">   
-            <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-2">Algorithm Convergence</h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">ALNS vs OR-Tools Cost Reduction</p>
+          <div className="lg:col-span-5 glass-panel rounded-xl p-6 flex flex-col relative border border-white/5 shadow-lg bg-surface">   
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Algorithm Convergence</h3>
+            <p className="font-body-md text-sm text-on-surface-variant mb-6">ALNS vs OR-Tools Cost Reduction</p>
             
             <div className="flex-grow w-full h-full min-h-[250px]">
               {chartData.length > 0 ? (
@@ -240,9 +240,9 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
                       wrapperStyle={{ paddingTop: '20px' }}
                       iconType="circle"
                     />
-                    <Line type="monotone" dataKey="L1" name="L1 (Greedy)" stroke="#ffb4a2" strokeWidth={3} dot={{ r: 3, fill: '#ffb4a2', strokeWidth: 0 }} activeDot={{ r: 6 }} connectNulls />
-                    <Line type="monotone" dataKey="ORTools" name="OR-Tools" stroke="#4d8eff" strokeWidth={3} dot={{ r: 3, fill: '#4d8eff', strokeWidth: 0 }} activeDot={{ r: 6 }} connectNulls />
-                    <Line type="monotone" dataKey="ALNS" name="ALNS" stroke="#d0bcff" strokeWidth={3} dot={{ r: 3, fill: '#d0bcff', strokeWidth: 0 }} activeDot={{ r: 6 }} connectNulls />
+                    <Line type="monotone" dataKey="L1" name="L1 (Greedy)" stroke="#ffe171" strokeWidth={3} dot={{ r: 3, fill: '#ffe171', strokeWidth: 0 }} activeDot={{ r: 6 }} connectNulls />
+                    <Line type="monotone" dataKey="ORTools" name="OR-Tools" stroke="#ffd60a" strokeWidth={3} dot={{ r: 3, fill: '#ffd60a', strokeWidth: 0 }} activeDot={{ r: 6 }} connectNulls />
+                    <Line type="monotone" dataKey="ALNS" name="ALNS" stroke="#ffc300" strokeWidth={3} dot={{ r: 3, fill: '#ffc300', strokeWidth: 0 }} activeDot={{ r: 6 }} connectNulls />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
@@ -257,8 +257,8 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
         {/* Bottom Row (50/50 Split) */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
           {/* Left: Fleet Manifest */}
-          <div className="bg-[#0f172a]/70 backdrop-blur-md rounded-xl p-6 flex flex-col border border-white/5 shadow-lg max-h-[600px] overflow-hidden">
-            <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-6">Fleet Manifest</h3>
+          <div className="glass-panel rounded-xl p-6 flex flex-col border border-white/5 shadow-lg bg-surface max-h-[600px] overflow-hidden">
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Fleet Manifest</h3>
             <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
               
               {result.routes?.map((route) => {
@@ -270,31 +270,31 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
                   <div 
                     key={route.vehicle_id}
                     onClick={() => handleVehicleToggle(route.vehicle_id)}
-                    className={`bg-surface-container-low border border-white/5 rounded-lg p-4 transition-all cursor-pointer group ${isActive ? 'ring-1 ring-primary bg-surface-bright/20' : 'hover:bg-surface-bright/30'}`}
+                    className={`bg-surface-container border border-white/5 rounded-lg p-4 transition-all cursor-pointer group ${isActive ? 'ring-1 ring-primary-container bg-surface-bright/20' : 'hover:bg-surface-bright/30'}`}
                   >
                     <div className="flex justify-between items-center mb-3">
                       <div className="flex items-center gap-3">
                           <span className="material-symbols-outlined text-[20px]">local_shipping</span>
-                        <div className={`${isActive ? 'bg-primary/20 text-primary' : 'bg-surface-container-highest text-on-surface-variant'} p-2 rounded-md transition-colors`}>
+                        <div className={`${isActive ? 'bg-primary-container/20 text-primary-container' : 'bg-surface-container-highest text-on-surface-variant'} p-2 rounded-md transition-colors`}>
                         </div>
-                        <h4 className="font-data-display text-data-display text-on-surface font-bold text-base">Vehicle {route.vehicle_id}</h4>
+                        <h4 className="font-label-mono-md text-on-surface font-bold text-base">Vehicle {route.vehicle_id}</h4>
                       </div>
-                      <span className={`material-symbols-outlined transition-colors ${isActive ? 'text-primary' : 'text-on-surface-variant group-hover:text-primary'}`}>
+                      <span className={`material-symbols-outlined transition-colors ${isActive ? 'text-primary-container' : 'text-on-surface-variant group-hover:text-primary-container'}`}>
                         {isActive ? 'visibility' : 'visibility_off'}
                       </span>
                     </div>
                     <div className={`grid grid-cols-3 gap-2 text-center transition-opacity ${isActive ? 'opacity-100' : 'opacity-70'}`}>
-                      <div className="bg-background rounded px-2 py-3">
-                        <p className="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Stops</p>
-                        <p className="font-data-display text-data-display text-on-surface text-sm">{uniqueStops}</p>
+                      <div className="bg-surface-container-lowest rounded px-2 py-3">
+                        <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant uppercase mb-1">Stops</p>
+                        <p className="font-label-mono-md text-on-surface text-sm">{uniqueStops}</p>
                       </div>
-                      <div className="bg-background rounded px-2 py-3">
-                        <p className="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Cost</p>
-                        <p className="font-data-display text-data-display text-on-surface text-sm">${route.total_cost.toFixed(0)}</p>
+                      <div className="bg-surface-container-lowest rounded px-2 py-3">
+                        <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant uppercase mb-1">Cost</p>
+                        <p className="font-label-mono-md text-on-surface text-sm">${route.total_cost.toFixed(0)}</p>
                       </div>
-                      <div className="bg-background rounded px-2 py-3">
-                        <p className="font-label-caps text-label-caps text-on-surface-variant text-[10px] mb-1">Duration</p>
-                        <p className="font-data-display text-data-display text-on-surface text-sm">{route.total_time_min.toFixed(0)} mins</p>
+                      <div className="bg-surface-container-lowest rounded px-2 py-3">
+                        <p className="font-label-mono-sm text-label-mono-sm text-on-surface-variant uppercase mb-1">Duration</p>
+                        <p className="font-label-mono-md text-on-surface text-sm">{route.total_time_min.toFixed(0)} mins</p>
                       </div>
                     </div>
                   </div>
@@ -305,8 +305,8 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
           </div>
 
           {/* Right: Simulation Event Log */}
-          <div className="bg-[#0f172a]/70 backdrop-blur-md rounded-xl p-6 flex flex-col border border-white/5 shadow-lg max-h-[600px] overflow-hidden">
-            <h3 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-6">Simulation Event Log</h3>
+          <div className="glass-panel rounded-xl p-6 flex flex-col border border-white/5 shadow-lg bg-surface max-h-[600px] overflow-hidden">
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-6">Simulation Event Log</h3>
             <div className="relative pl-6 border-l-2 border-surface-container-highest space-y-8 flex-grow overflow-y-auto pr-4 custom-scrollbar pb-8">
               
               {result.events?.map((event, idx) => {
@@ -321,10 +321,10 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
                    dotColor = event.success ? 'bg-[#34d399]' : 'bg-error';
                    textColor = event.success ? 'text-[#34d399]' : 'text-error';
                 } else if (event.type === 'optimization') {
-                   dotColor = 'bg-secondary';
-                   textColor = 'text-secondary';
-                   iconGlow = 'shadow-[0_0_10px_rgba(208,188,255,0.5)] bg-secondary-container';
-                } else if (event.type === 'premium') {
+                   dotColor = 'bg-primary-container';
+                   textColor = 'text-primary-container';
+                   iconGlow = 'shadow-[0_0_10px_rgba(255,195,0,0.5)] bg-surface-bright';
+                 } else if (event.type === 'premium') {
                    dotColor = 'bg-[#ffc107]';
                    textColor = 'text-[#ffc107]';
                 }
@@ -334,8 +334,8 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, requ
                     <div className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-background flex items-center justify-center ${iconGlow ? iconGlow : 'bg-surface-container-highest'}`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></div>
                     </div>
-                    <p className={`font-data-display text-data-display text-[12px] mb-1 ${textColor}`}>[{event.time}]</p>
-                    <p className="font-body-sm text-body-sm text-on-surface" dangerouslySetInnerHTML={{ __html: event.description }}></p>
+                    <p className={`font-label-mono-md text-[12px] mb-1 ${textColor}`}>[{event.time}]</p>
+                    <p className="font-body-md text-sm text-on-surface" dangerouslySetInnerHTML={{ __html: event.description }}></p>
                   </div>
                 );
               })}
