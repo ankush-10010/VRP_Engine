@@ -1,0 +1,1601 @@
+{
+  "status": "Completed",
+  "orders_processed": 50,
+  "unique_locations_found": 5,
+  "routes": [
+    {
+      "vehicle_id": 5,
+      "steps": [
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 0,
+          "departure_time_min": 0
+        },
+        {
+          "stop_index": 49,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 0.4166666666666667,
+          "departure_time_min": 5.416666666666667
+        },
+        {
+          "stop_index": 30,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 5.416666666666667,
+          "departure_time_min": 10.416666666666668
+        },
+        {
+          "stop_index": 32,
+          "address": "Aura Pizzas, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.53536,
+          "lng": 77.2419522,
+          "arrival_time_min": 10.566666666666668,
+          "departure_time_min": 15.566666666666668
+        },
+        {
+          "stop_index": 7,
+          "address": "Aura Pizzas, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.53536,
+          "lng": 77.2419522,
+          "arrival_time_min": 15.566666666666668,
+          "departure_time_min": 20.56666666666667
+        },
+        {
+          "stop_index": 25,
+          "address": "Aura Pizzas, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.53536,
+          "lng": 77.2419522,
+          "arrival_time_min": 20.56666666666667,
+          "departure_time_min": 25.56666666666667
+        },
+        {
+          "stop_index": 39,
+          "address": "Aura Pizzas, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.53536,
+          "lng": 77.2419522,
+          "arrival_time_min": 25.56666666666667,
+          "departure_time_min": 30.56666666666667
+        },
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 31.033333333333335,
+          "departure_time_min": 31.033333333333335
+        }
+      ],
+      "total_cost": 0,
+      "total_time_min": 31.033333333333335
+    },
+    {
+      "vehicle_id": 6,
+      "steps": [
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 0,
+          "departure_time_min": 0
+        },
+        {
+          "stop_index": 6,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 0.5166666666666667,
+          "departure_time_min": 5.516666666666667
+        },
+        {
+          "stop_index": 22,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 5.516666666666667,
+          "departure_time_min": 10.516666666666666
+        },
+        {
+          "stop_index": 20,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 10.516666666666666,
+          "departure_time_min": 15.516666666666666
+        },
+        {
+          "stop_index": 37,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 15.516666666666666,
+          "departure_time_min": 20.516666666666666
+        },
+        {
+          "stop_index": 5,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 20.516666666666666,
+          "departure_time_min": 25.516666666666666
+        },
+        {
+          "stop_index": 29,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 25.516666666666666,
+          "departure_time_min": 30.516666666666666
+        },
+        {
+          "stop_index": 27,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 30.516666666666666,
+          "departure_time_min": 35.516666666666666
+        },
+        {
+          "stop_index": 45,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 35.516666666666666,
+          "departure_time_min": 40.516666666666666
+        },
+        {
+          "stop_index": 35,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 40.516666666666666,
+          "departure_time_min": 45.516666666666666
+        },
+        {
+          "stop_index": 9,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 45.516666666666666,
+          "departure_time_min": 50.516666666666666
+        },
+        {
+          "stop_index": 12,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 50.516666666666666,
+          "departure_time_min": 55.516666666666666
+        },
+        {
+          "stop_index": 26,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 55.516666666666666,
+          "departure_time_min": 60.516666666666666
+        },
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 61.1,
+          "departure_time_min": 61.1
+        }
+      ],
+      "total_cost": 0,
+      "total_time_min": 61.1
+    },
+    {
+      "vehicle_id": 7,
+      "steps": [
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 0,
+          "departure_time_min": 0
+        },
+        {
+          "stop_index": 36,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 0.5166666666666667,
+          "departure_time_min": 5.516666666666667
+        },
+        {
+          "stop_index": 15,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 5.516666666666667,
+          "departure_time_min": 10.516666666666666
+        },
+        {
+          "stop_index": 16,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 10.516666666666666,
+          "departure_time_min": 15.516666666666666
+        },
+        {
+          "stop_index": 21,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 15.516666666666666,
+          "departure_time_min": 20.516666666666666
+        },
+        {
+          "stop_index": 13,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 20.516666666666666,
+          "departure_time_min": 25.516666666666666
+        },
+        {
+          "stop_index": 10,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 25.516666666666666,
+          "departure_time_min": 30.516666666666666
+        },
+        {
+          "stop_index": 28,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 30.516666666666666,
+          "departure_time_min": 35.516666666666666
+        },
+        {
+          "stop_index": 46,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 35.516666666666666,
+          "departure_time_min": 40.516666666666666
+        },
+        {
+          "stop_index": 24,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 40.516666666666666,
+          "departure_time_min": 45.516666666666666
+        },
+        {
+          "stop_index": 1,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 45.516666666666666,
+          "departure_time_min": 50.516666666666666
+        },
+        {
+          "stop_index": 17,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 50.516666666666666,
+          "departure_time_min": 55.516666666666666
+        },
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 56.1,
+          "departure_time_min": 56.1
+        }
+      ],
+      "total_cost": 0,
+      "total_time_min": 56.1
+    },
+    {
+      "vehicle_id": 8,
+      "steps": [
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 0,
+          "departure_time_min": 0
+        },
+        {
+          "stop_index": 11,
+          "address": "Swaad, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 0.5166666666666667,
+          "departure_time_min": 5.516666666666667
+        },
+        {
+          "stop_index": 2,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 5.516666666666667,
+          "departure_time_min": 10.516666666666666
+        },
+        {
+          "stop_index": 48,
+          "address": "Aura Pizzas, Sector 4, Delhi NCR",
+          "lat": 28.5580188,
+          "lng": 77.17871140000001,
+          "arrival_time_min": 10.516666666666666,
+          "departure_time_min": 15.516666666666666
+        },
+        {
+          "stop_index": 50,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 16.133333333333333,
+          "departure_time_min": 21.133333333333333
+        },
+        {
+          "stop_index": 40,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 21.133333333333333,
+          "departure_time_min": 26.133333333333333
+        },
+        {
+          "stop_index": 19,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 26.133333333333333,
+          "departure_time_min": 31.133333333333333
+        },
+        {
+          "stop_index": 18,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 31.133333333333333,
+          "departure_time_min": 36.13333333333333
+        },
+        {
+          "stop_index": 3,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 36.13333333333333,
+          "departure_time_min": 41.13333333333333
+        },
+        {
+          "stop_index": 14,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 41.13333333333333,
+          "departure_time_min": 46.13333333333333
+        },
+        {
+          "stop_index": 23,
+          "address": "Aura Pizzas, DLF Phase 1, Delhi NCR",
+          "lat": 28.4650453,
+          "lng": 77.10071169999999,
+          "arrival_time_min": 46.13333333333333,
+          "departure_time_min": 51.13333333333333
+        },
+        {
+          "stop_index": 44,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 51.85,
+          "departure_time_min": 56.85
+        },
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 57.25,
+          "departure_time_min": 57.25
+        }
+      ],
+      "total_cost": 0,
+      "total_time_min": 57.25
+    },
+    {
+      "vehicle_id": 9,
+      "steps": [
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 0,
+          "departure_time_min": 0
+        },
+        {
+          "stop_index": 38,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 0.4166666666666667,
+          "departure_time_min": 5.416666666666667
+        },
+        {
+          "stop_index": 42,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 5.416666666666667,
+          "departure_time_min": 10.416666666666668
+        },
+        {
+          "stop_index": 4,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 10.416666666666668,
+          "departure_time_min": 15.416666666666668
+        },
+        {
+          "stop_index": 34,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 15.416666666666668,
+          "departure_time_min": 20.416666666666668
+        },
+        {
+          "stop_index": 8,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 20.416666666666668,
+          "departure_time_min": 25.416666666666668
+        },
+        {
+          "stop_index": 47,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 25.416666666666668,
+          "departure_time_min": 30.416666666666668
+        },
+        {
+          "stop_index": 31,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 30.416666666666668,
+          "departure_time_min": 35.41666666666667
+        },
+        {
+          "stop_index": 43,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 35.41666666666667,
+          "departure_time_min": 40.41666666666667
+        },
+        {
+          "stop_index": 33,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 40.41666666666667,
+          "departure_time_min": 45.41666666666667
+        },
+        {
+          "stop_index": 41,
+          "address": "Swaad, Greater Kailash 2 (GK2), Delhi NCR",
+          "lat": 28.549756,
+          "lng": 77.2501151,
+          "arrival_time_min": 45.41666666666667,
+          "departure_time_min": 50.41666666666667
+        },
+        {
+          "stop_index": 0,
+          "address": "Depot",
+          "lat": 28.5707,
+          "lng": 77.3262,
+          "arrival_time_min": 50.81666666666667,
+          "departure_time_min": 50.81666666666667
+        }
+      ],
+      "total_cost": 0,
+      "total_time_min": 50.81666666666667
+    }
+  ],
+  "total_cost": 28035.535,
+  "unassigned": [],
+  "analytics": {
+    "total_orders": 50,
+    "assigned_orders": 50,
+    "success_rate": 100,
+    "avg_wait_time_min": 0,
+    "fleet_utilization_pct": 45,
+    "total_distance_km": 202.36900000000003
+  },
+  "optimization_log": [
+    {
+      "iteration": 1,
+      "timestamp": "08:00",
+      "l1_cost": 5549.51,
+      "l2_cost": 5549.51,
+      "l3_cost": 5549.51,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 2,
+      "timestamp": "08:30",
+      "l1_cost": 6134.705,
+      "l2_cost": 6134.705,
+      "l3_cost": 6134.705,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 3,
+      "timestamp": "09:00",
+      "l1_cost": 11684.215,
+      "l2_cost": 11610.715,
+      "l3_cost": 11610.715,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 4,
+      "timestamp": "09:30",
+      "l1_cost": 11652.43,
+      "l2_cost": 11610.715,
+      "l3_cost": 11610.715,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 5,
+      "timestamp": "10:00",
+      "l1_cost": 11687.86,
+      "l2_cost": 11684.215,
+      "l3_cost": 11738.8,
+      "winner": "L2",
+      "improvement_pct": 0.46499642212150416
+    },
+    {
+      "iteration": 6,
+      "timestamp": "10:30",
+      "l1_cost": 17159.955,
+      "l2_cost": 17052.96,
+      "l3_cost": 17052.96,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 7,
+      "timestamp": "11:00",
+      "l1_cost": 17288.31,
+      "l2_cost": 17114.82,
+      "l3_cost": 17165.28,
+      "winner": "L2",
+      "improvement_pct": 0.2939654931349744
+    },
+    {
+      "iteration": 8,
+      "timestamp": "11:30",
+      "l1_cost": 17289.165,
+      "l2_cost": 17160.225,
+      "l3_cost": 17288.31,
+      "winner": "L2",
+      "improvement_pct": 0.7408763493944912
+    },
+    {
+      "iteration": 9,
+      "timestamp": "12:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17288.31,
+      "winner": "L2",
+      "improvement_pct": 0.7408763493944912
+    },
+    {
+      "iteration": 10,
+      "timestamp": "12:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17165.28,
+      "winner": "L2",
+      "improvement_pct": 0.02944898073320267
+    },
+    {
+      "iteration": 11,
+      "timestamp": "13:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17165.28,
+      "winner": "L2",
+      "improvement_pct": 0.02944898073320267
+    },
+    {
+      "iteration": 12,
+      "timestamp": "13:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17288.31,
+      "winner": "L2",
+      "improvement_pct": 0.7408763493944912
+    },
+    {
+      "iteration": 13,
+      "timestamp": "14:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 14,
+      "timestamp": "14:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 15,
+      "timestamp": "15:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17288.31,
+      "winner": "L2",
+      "improvement_pct": 0.7408763493944912
+    },
+    {
+      "iteration": 16,
+      "timestamp": "15:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 17,
+      "timestamp": "16:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17233.725,
+      "winner": "L2",
+      "improvement_pct": 0.4264893399424675
+    },
+    {
+      "iteration": 18,
+      "timestamp": "16:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17288.31,
+      "winner": "L2",
+      "improvement_pct": 0.7408763493944912
+    },
+    {
+      "iteration": 19,
+      "timestamp": "17:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 20,
+      "timestamp": "17:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 21,
+      "timestamp": "18:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 22,
+      "timestamp": "18:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 23,
+      "timestamp": "19:00",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17160.225,
+      "winner": "L2",
+      "improvement_pct": 0
+    },
+    {
+      "iteration": 24,
+      "timestamp": "19:30",
+      "l1_cost": 17160.225,
+      "l2_cost": 17160.225,
+      "l3_cost": 17237.37,
+      "winner": "L2",
+      "improvement_pct": 0.4475450721310759
+    },
+    {
+      "iteration": 25,
+      "timestamp": "20:00",
+      "l1_cost": 17217.27,
+      "l2_cost": 17217.27,
+      "l3_cost": 17347.815,
+      "winner": "L2",
+      "improvement_pct": 0.7525155185249455
+    },
+    {
+      "iteration": 26,
+      "timestamp": "20:30",
+      "l1_cost": 22693.01,
+      "l2_cost": 22531.43,
+      "l3_cost": 22664.33,
+      "winner": "L2",
+      "improvement_pct": 0.5863839787013402
+    },
+    {
+      "iteration": 27,
+      "timestamp": "21:00",
+      "l1_cost": 22531.43,
+      "l2_cost": 22531.43,
+      "l3_cost": 22721.375,
+      "winner": "L2",
+      "improvement_pct": 0.83597493549576
+    },
+    {
+      "iteration": 28,
+      "timestamp": "21:30",
+      "l1_cost": 23230.895,
+      "l2_cost": 22536.485,
+      "l3_cost": 22632.305,
+      "winner": "L2",
+      "improvement_pct": 0.42337711514580467
+    },
+    {
+      "iteration": 29,
+      "timestamp": "22:00",
+      "l1_cost": 28277.23,
+      "l2_cost": 27973.675,
+      "l3_cost": 28819.66,
+      "winner": "L2",
+      "improvement_pct": 2.935444068389428
+    },
+    {
+      "iteration": 30,
+      "timestamp": "22:30",
+      "l1_cost": 28700.755,
+      "l2_cost": 28035.535,
+      "l3_cost": 28707.79,
+      "winner": "L2",
+      "improvement_pct": 2.34171630766423
+    },
+    {
+      "iteration": 31,
+      "timestamp": "23:00",
+      "l1_cost": 28035.535,
+      "l2_cost": 28035.535,
+      "l3_cost": 28261.945,
+      "winner": "L2",
+      "improvement_pct": 0.8011125915077673
+    }
+  ],
+  "events": [
+    {
+      "time": "08:00",
+      "type": "new_order",
+      "description": "New Order #6170347313 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:00",
+      "type": "assignment",
+      "description": "Assigned Order #6170347313 via New Vehicle",
+      "success": true
+    },
+    {
+      "time": "08:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 5549.51",
+      "success": true
+    },
+    {
+      "time": "08:04",
+      "type": "new_order",
+      "description": "New Order #6173347082 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "08:04",
+      "type": "assignment",
+      "description": "Assigned Order #6173347082 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:06",
+      "type": "new_order",
+      "description": "New Order #6173475886 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:06",
+      "type": "assignment",
+      "description": "Assigned Order #6173475886 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:09",
+      "type": "new_order",
+      "description": "New Order #6172019018 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:09",
+      "type": "assignment",
+      "description": "Assigned Order #6172019018 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:11",
+      "type": "new_order",
+      "description": "New Order #6167910840 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:11",
+      "type": "assignment",
+      "description": "Assigned Order #6167910840 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:11",
+      "type": "new_order",
+      "description": "New Order #6173803705 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "08:11",
+      "type": "assignment",
+      "description": "Assigned Order #6173803705 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:17",
+      "type": "new_order",
+      "description": "New Order #6155552667 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "08:17",
+      "type": "assignment",
+      "description": "Assigned Order #6155552667 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:22",
+      "type": "new_order",
+      "description": "New Order #6171011401 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:22",
+      "type": "assignment",
+      "description": "Assigned Order #6171011401 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:23",
+      "type": "new_order",
+      "description": "New Order #6168191492 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:23",
+      "type": "assignment",
+      "description": "Assigned Order #6168191492 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:28",
+      "type": "new_order",
+      "description": "New Order #6166261184 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:28",
+      "type": "assignment",
+      "description": "Assigned Order #6166261184 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 6134.70",
+      "success": true
+    },
+    {
+      "time": "08:32",
+      "type": "new_order",
+      "description": "New Order #6173727380 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:32",
+      "type": "assignment",
+      "description": "Assigned Order #6173727380 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:32",
+      "type": "new_order",
+      "description": "New Order #6170217954 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:32",
+      "type": "assignment",
+      "description": "Assigned Order #6170217954 via New Vehicle",
+      "success": true
+    },
+    {
+      "time": "08:44",
+      "type": "new_order",
+      "description": "New Order #6167528888 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:44",
+      "type": "assignment",
+      "description": "Assigned Order #6167528888 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:47",
+      "type": "new_order",
+      "description": "New Order #6171669390 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "08:47",
+      "type": "assignment",
+      "description": "Assigned Order #6171669390 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:55",
+      "type": "new_order",
+      "description": "New Order #6171137953 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "08:55",
+      "type": "assignment",
+      "description": "Assigned Order #6171137953 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "08:55",
+      "type": "new_order",
+      "description": "New Order #6170930357 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "08:55",
+      "type": "assignment",
+      "description": "Assigned Order #6170930357 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "09:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 11610.72",
+      "success": true
+    },
+    {
+      "time": "09:02",
+      "type": "new_order",
+      "description": "New Order #6161886849 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "09:02",
+      "type": "assignment",
+      "description": "Assigned Order #6161886849 via Tabu Search",
+      "success": true
+    },
+    {
+      "time": "09:07",
+      "type": "new_order",
+      "description": "New Order #6169494928 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "09:07",
+      "type": "assignment",
+      "description": "Assigned Order #6169494928 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "09:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 11610.72",
+      "success": true
+    },
+    {
+      "time": "09:31",
+      "type": "new_order",
+      "description": "New Order #6164412913 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "09:31",
+      "type": "assignment",
+      "description": "Assigned Order #6164412913 via Tabu Search",
+      "success": true
+    },
+    {
+      "time": "09:34",
+      "type": "new_order",
+      "description": "New Order #6171583372 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "09:34",
+      "type": "assignment",
+      "description": "Assigned Order #6171583372 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "09:39",
+      "type": "new_order",
+      "description": "New Order #6166823024 (Demand: 4)",
+      "success": true
+    },
+    {
+      "time": "09:39",
+      "type": "assignment",
+      "description": "Assigned Order #6166823024 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "09:43",
+      "type": "new_order",
+      "description": "New Order #6167845013 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "09:43",
+      "type": "assignment",
+      "description": "Assigned Order #6167845013 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "09:47",
+      "type": "new_order",
+      "description": "New Order #6171967524 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "09:47",
+      "type": "assignment",
+      "description": "Assigned Order #6171967524 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "09:54",
+      "type": "new_order",
+      "description": "New Order #6164162160 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "09:54",
+      "type": "assignment",
+      "description": "Assigned Order #6164162160 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "10:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 11684.22",
+      "success": true
+    },
+    {
+      "time": "10:05",
+      "type": "new_order",
+      "description": "New Order #6172736866 (Demand: 3)",
+      "success": true
+    },
+    {
+      "time": "10:05",
+      "type": "assignment",
+      "description": "Assigned Order #6172736866 via New Vehicle",
+      "success": true
+    },
+    {
+      "time": "10:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17052.96",
+      "success": true
+    },
+    {
+      "time": "10:38",
+      "type": "new_order",
+      "description": "New Order #6174002477 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "10:38",
+      "type": "assignment",
+      "description": "Assigned Order #6174002477 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "11:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17114.82",
+      "success": true
+    },
+    {
+      "time": "11:21",
+      "type": "new_order",
+      "description": "New Order #6164583577 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "11:21",
+      "type": "assignment",
+      "description": "Assigned Order #6164583577 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "11:25",
+      "type": "new_order",
+      "description": "New Order #6171428860 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "11:25",
+      "type": "assignment",
+      "description": "Assigned Order #6171428860 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "11:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "12:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "12:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "13:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "13:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "14:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "14:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "15:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "15:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "16:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "16:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "17:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "17:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "18:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "18:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "19:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "19:14",
+      "type": "new_order",
+      "description": "New Order #6173481416 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "19:14",
+      "type": "assignment",
+      "description": "Assigned Order #6173481416 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "19:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17160.22",
+      "success": true
+    },
+    {
+      "time": "19:51",
+      "type": "new_order",
+      "description": "New Order #6163958537 (Demand: 4)",
+      "success": true
+    },
+    {
+      "time": "19:51",
+      "type": "assignment",
+      "description": "Assigned Order #6163958537 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "20:00",
+      "type": "new_order",
+      "description": "New Order #6170228790 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "20:00",
+      "type": "assignment",
+      "description": "Assigned Order #6170228790 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "20:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 17217.27",
+      "success": true
+    },
+    {
+      "time": "20:16",
+      "type": "new_order",
+      "description": "New Order #6162620760 (Demand: 4)",
+      "success": true
+    },
+    {
+      "time": "20:16",
+      "type": "assignment",
+      "description": "Assigned Order #6162620760 via New Vehicle",
+      "success": true
+    },
+    {
+      "time": "20:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 22531.43",
+      "success": true
+    },
+    {
+      "time": "20:33",
+      "type": "new_order",
+      "description": "New Order #6167538020 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "20:33",
+      "type": "assignment",
+      "description": "Assigned Order #6167538020 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "20:43",
+      "type": "new_order",
+      "description": "New Order #6173988333 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "20:43",
+      "type": "assignment",
+      "description": "Assigned Order #6173988333 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 22531.43",
+      "success": true
+    },
+    {
+      "time": "21:05",
+      "type": "new_order",
+      "description": "New Order #6168470727 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:05",
+      "type": "assignment",
+      "description": "Assigned Order #6168470727 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:08",
+      "type": "new_order",
+      "description": "New Order #6160119251 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "21:08",
+      "type": "assignment",
+      "description": "Assigned Order #6160119251 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:09",
+      "type": "new_order",
+      "description": "New Order #6164744156 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "21:09",
+      "type": "assignment",
+      "description": "Assigned Order #6164744156 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:16",
+      "type": "new_order",
+      "description": "New Order #6169740440 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:16",
+      "type": "assignment",
+      "description": "Assigned Order #6169740440 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:16",
+      "type": "new_order",
+      "description": "New Order #6172291232 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "21:16",
+      "type": "assignment",
+      "description": "Assigned Order #6172291232 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:17",
+      "type": "new_order",
+      "description": "New Order #6174504557 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "21:17",
+      "type": "assignment",
+      "description": "Assigned Order #6174504557 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:23",
+      "type": "new_order",
+      "description": "New Order #6168720949 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:23",
+      "type": "assignment",
+      "description": "Assigned Order #6168720949 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 22536.49",
+      "success": true
+    },
+    {
+      "time": "21:42",
+      "type": "new_order",
+      "description": "New Order #6173123352 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:42",
+      "type": "assignment",
+      "description": "Assigned Order #6173123352 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:44",
+      "type": "new_order",
+      "description": "New Order #6157530146 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:44",
+      "type": "assignment",
+      "description": "Assigned Order #6157530146 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:47",
+      "type": "new_order",
+      "description": "New Order #6173620316 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:47",
+      "type": "assignment",
+      "description": "Assigned Order #6173620316 via New Vehicle",
+      "success": true
+    },
+    {
+      "time": "21:47",
+      "type": "new_order",
+      "description": "New Order #6174122306 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "21:47",
+      "type": "assignment",
+      "description": "Assigned Order #6174122306 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:53",
+      "type": "new_order",
+      "description": "New Order #6173620308 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:53",
+      "type": "assignment",
+      "description": "Assigned Order #6173620308 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "21:53",
+      "type": "new_order",
+      "description": "New Order #6173656934 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "21:53",
+      "type": "assignment",
+      "description": "Assigned Order #6173656934 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "22:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 27973.67",
+      "success": true
+    },
+    {
+      "time": "22:02",
+      "type": "new_order",
+      "description": "New Order #6172760436 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "22:02",
+      "type": "assignment",
+      "description": "Assigned Order #6172760436 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "22:07",
+      "type": "new_order",
+      "description": "New Order #6173360612 (Demand: 2)",
+      "success": true
+    },
+    {
+      "time": "22:07",
+      "type": "assignment",
+      "description": "Assigned Order #6173360612 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "22:13",
+      "type": "new_order",
+      "description": "New Order #6169348235 (Demand: 1)",
+      "success": true
+    },
+    {
+      "time": "22:13",
+      "type": "assignment",
+      "description": "Assigned Order #6169348235 via Best Insertion",
+      "success": true
+    },
+    {
+      "time": "22:30",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 28035.53",
+      "success": true
+    },
+    {
+      "time": "23:00",
+      "type": "optimization",
+      "description": "Global Optimization: L2 won. Cost: 28035.53",
+      "success": true
+    }
+  ]
+}

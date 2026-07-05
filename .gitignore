@@ -12,6 +12,13 @@
 !*.yml
 !.dockerignore
 !*.pdf
+!*.ts
+!*.tsx
+!*.js
+!*.jsx
+!*.css
+!*.json
+!*.html
 # Removed !*.jpg from here to ignore resume.jpg
 
 # Un-ignore all directories so git can traverse them
