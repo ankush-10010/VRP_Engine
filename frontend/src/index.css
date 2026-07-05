@@ -12,3 +12,17 @@
     0% { background-position: 0% 50%; }
     100% { background-position: 200% 50%; }
 }
+
+.glass-panel {
+    background: rgba(0, 29, 61, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid #003566;
+}
+
+.hud-glow {
+    box-shadow: inset 0 0 0 1px rgba(255, 195, 0, 0.2);
+}
+
+.bg-level-0 { background-color: #000814; }
+.bg-level-1 { background-color: #001D3D; border: 1px solid #003566; }

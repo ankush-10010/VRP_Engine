@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { uploadSimulationCsv } from '../api/api';
+import { Link } from 'react-router-dom';
 
 export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: any, jobId?: string) => void }> = ({ onUploadStart }) => {
   const [strategy, setStrategy] = useState('alns');
@@ -65,6 +66,12 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: a
             <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>hub</span>
             <span className="font-headline-lg text-headline-lg font-bold text-primary tracking-tighter">VRP Engine</span>
           </div>
+        </div>
+        <div className="flex items-center mr-4">
+          <Link to="/docs" className="flex items-center gap-2 px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant rounded-lg text-primary transition-colors font-label-caps text-label-caps">
+            <span className="material-symbols-outlined text-[18px]">library_books</span>
+            Documentation
+          </Link>
         </div>
       </nav>
 
