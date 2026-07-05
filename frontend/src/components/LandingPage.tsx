@@ -21,9 +21,9 @@ export const LandingPage: React.FC<{ onUploadStart: (taskId: string, payload?: a
   
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [matrixMode, setMatrixMode] = useState('scratch');
+  const [matrixMode, setMatrixMode] = useState('database');
   const [matrixFile, setMatrixFile] = useState<File | null>(null);
-  const [useDefaultCsv, setUseDefaultCsv] = useState(false);
+  const [useDefaultCsv, setUseDefaultCsv] = useState(true);
 
 
 
