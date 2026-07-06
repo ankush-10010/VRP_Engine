@@ -19,8 +19,9 @@
 !*.css
 !*.json
 !*.html
-# Removed !*.jpg from here to ignore resume.jpg
-
+!*.svg
+!*.png
+!frontend/public/photo_2026-07-05_21-01-51.jpg
 # Un-ignore all directories so git can traverse them
 !*/
 
